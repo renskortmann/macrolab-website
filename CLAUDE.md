@@ -225,13 +225,19 @@ To do:
    **Never probe the live site with requests the firewall may block from the
    user's own network** (Claude runs in WSL on the same public IP): a ban locks
    the user out of the site and Plesk.
-5. After 25 idle minutes, a reload must ask to sign in again.
+5. ~~Idle limit~~ - verified on the live site 2026-10-03 after the fix: after
+   25 idle minutes the admin was asked to sign in again. (The Plesk panel has
+   its own, unrelated idle timeout, 30 minutes by default.)
 6. `httpdocs/` (Plesk's original document root: default `index.html`,
    `cgi-bin/`, and a `.well-known/` from the failed 2026-10-01 certificate
-   attempt) is unused. Rename it to `httpdocs.unused` rather than delete it
-   straight away, and delete it after the first automatic certificate renewal
-   (around early December 2026) has succeeded - in case renewal still looks
-   for `.well-known/` there. If renewal fails, rename it back and renew.
+   attempt) was renamed to `httpdocs.unused` on 2026-10-03. Delete it after
+   the first automatic certificate renewal (around early December 2026) has
+   succeeded - in case renewal still looks for `.well-known/` there. If
+   renewal fails, rename it back to `httpdocs` and renew.
+7. Next time: backups (ask ICT about server-level backups first; see item 3)
+   and the first real users (allowlist, set-up links, activities; then a
+   real sign-in at `/login`, a booking and a time entry, to confirm the
+   firewall stays quiet in ordinary use).
 
 ## Updates after go-live
 
