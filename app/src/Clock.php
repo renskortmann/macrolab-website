@@ -107,6 +107,39 @@ final class Clock
         return $rest === 0 ? $text : $text . ' ' . $rest . ' minutes';
     }
     /**
+     * A date as typed or submitted, as "Y-m-d" - or null when it is not a real
+     * calendar date.
+     *
+     * The site shows dates day first (dd-mm-yyyy), so that is what people
+     * type: 08-10-2026, 8-10-2026, 08/10/2026 and 08.10.2026 all mean 8
+     * October. ISO (2026-10-08) is accepted too, because links and the
+     * browser's own date picker use it. Never handed to PHP's date parser
+     * as is: that reads 08/10/2026 the American way, as 10 August.
+     */
+    public static function isoDate(string $value): ?string
+    {
+        $value = trim($value);
+
+        if (preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $value, $m) === 1) {
+            [$year, $month, $day] = [(int) $m[1], (int) $m[2], (int) $m[3]];
+        } elseif (preg_match('#^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$#', $value, $m) === 1) {
+            [$day, $month, $year] = [(int) $m[1], (int) $m[2], (int) $m[3]];
+        } else {
+            return null;
+        }
+
+        return checkdate($month, $day, $year) ? sprintf('%04d-%02d-%02d', $year, $month, $day) : null;
+    }
+
+    /** "2026-10-08" as the site shows dates: "08-10-2026". Anything else is returned unchanged. */
+    public static function dmy(string $isoDate): string
+    {
+        return preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $isoDate, $m) === 1
+            ? $m[3] . '-' . $m[2] . '-' . $m[1]
+            : $isoDate;
+    }
+
+    /**
      * Parse a time submitted by a browser into a UTC instant.
      *
      * A value carrying an offset ("2026-09-14T09:00:00+02:00" or "...Z") is

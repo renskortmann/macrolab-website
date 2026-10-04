@@ -56,7 +56,7 @@ final class TimeController
             'title'      => 'Time registration',
             'day'        => $day,
             // A calendar day, so ->format() and never Clock::local(): see TimeEntry.
-            'dayLabel'   => $day->format('l - d/m/Y'),
+            'dayLabel'   => $day->format('l - d-m-Y'),
             'prevDay'    => $day->modify('-1 day')->format('Y-m-d'),
             'nextDay'    => $day->modify('+1 day')->format('Y-m-d'),
             'isWeekend'  => (int) $day->format('N') >= 6,

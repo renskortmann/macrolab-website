@@ -80,4 +80,23 @@ final class ClockTest extends TestCase
         // Not a round number of days, so it stays in hours.
         self::assertSame('25 hours', Clock::humanDuration(25 * 60));
     }
+
+    public function testDatesAreReadDayFirstOrAsIso(): void
+    {
+        foreach (['08-10-2026', '8-10-2026', '08/10/2026', '8.10.2026', '2026-10-08'] as $typed) {
+            self::assertSame('2026-10-08', Clock::isoDate($typed), $typed . ' is 8 October');
+        }
+    }
+
+    public function testImpossibleOrAmbiguousDatesAreRefused(): void
+    {
+        foreach (['30-02-2025', '10/32/2026', '2026-13-01', '08-10-26', 'tomorrow', ''] as $typed) {
+            self::assertNull(Clock::isoDate($typed), var_export($typed, true) . ' is refused');
+        }
+    }
+
+    public function testIsoDatesAreShownDayFirst(): void
+    {
+        self::assertSame('08-10-2026', Clock::dmy('2026-10-08'));
+    }
 }

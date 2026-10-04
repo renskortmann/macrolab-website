@@ -515,6 +515,14 @@ Shared by both systems:
 - **Times.** Every timestamp is stored in UTC and rendered in
   `app.display_timezone`. The one exception is the day a time entry is for,
   which is a plain calendar date and never shifted by a timezone.
+- **Dates are shown and typed day first** (08-10-2026), or written out
+  ("Thu 8 Oct 2026"). Browsers display their built-in date input in the
+  browser's language - month first in an American one - and a page cannot
+  change that, so date fields are plain text fields with a calendar button
+  that opens the browser's picker (`date_field()` in `app/src/helpers.php`).
+  The server reads dates with `Clock::isoDate()`: day first, or ISO from links,
+  and never the American way. Links and the CSV export keep ISO dates
+  (2026-10-08), which every spreadsheet reads correctly.
 - **The allowlist gate** lives in `Auth::signIn()`, not in an authentication
   provider, so it cannot be bypassed by a bug in one provider and does not have
   to be reimplemented when SSO is added.

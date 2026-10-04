@@ -22,10 +22,10 @@ use Macrolab\Time\TimeRules;
 
     <form method="get" action="<?= e(path($basePath)) ?>" class="row">
         <label for="from">From</label>
-        <input id="from" name="from" type="date" data-echo value="<?= e($filter->from->format('Y-m-d')) ?>">
+        <?= date_field('from', $filter->from->format('Y-m-d'), ['id' => 'from']) ?>
 
         <label for="to">To</label>
-        <input id="to" name="to" type="date" data-echo value="<?= e($filter->to->format('Y-m-d')) ?>">
+        <?= date_field('to', $filter->to->format('Y-m-d'), ['id' => 'to']) ?>
 
         <label for="user">Person</label>
         <select id="user" name="user">

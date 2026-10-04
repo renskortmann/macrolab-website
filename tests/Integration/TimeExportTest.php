@@ -58,6 +58,14 @@ final class TimeExportTest extends DatabaseTestCase
         self::assertStringContainsString(';3,50;210;"Pump; filters, seals";', $lines[1]);
     }
 
+    public function testTheFilterTakesDatesDayFirstAsTheFormSendsThem(): void
+    {
+        $response = (new AdminTimeController())->export(new Request('GET', '/admin/time.csv',
+            query: ['from' => '01-09-2026', 'to' => '30-09-2026']));
+
+        self::assertStringContainsString('2026-09-16,lee,Lee,', $response->body, 'the entry of 16 September is in range');
+    }
+
     public function testWithoutAChoiceItIsCommas(): void
     {
         self::assertStringStartsWith('date,netid', $this->export(null)[0]);

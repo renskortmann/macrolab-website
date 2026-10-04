@@ -7,7 +7,7 @@
  * there is no submit button.
  *
  * @var \DateTimeImmutable                                                                 $day
- * @var string                                                                             $dayLabel   "Friday - 18/09/2026"
+ * @var string                                                                             $dayLabel   "Friday - 18-09-2026"
  * @var string                                                                             $prevDay
  * @var string                                                                             $nextDay
  * @var bool                                                                               $isWeekend

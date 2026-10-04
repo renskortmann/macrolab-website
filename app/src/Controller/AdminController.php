@@ -541,10 +541,11 @@ final class AdminController
      */
     private static function readMoment(Request $request, string $name): ?DateTimeImmutable
     {
-        $date = $request->post($name . '_date', '') ?? '';
+        // The date as the form shows it, day first; made ISO before parsing.
+        $date = Clock::isoDate($request->post($name . '_date', '') ?? '');
         $time = $request->post($name . '_time', '') ?? '';
 
-        if ($date === '' || $time === '') {
+        if ($date === null || $time === '') {
             return null;
         }
 

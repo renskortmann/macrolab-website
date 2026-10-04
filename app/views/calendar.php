@@ -92,14 +92,14 @@ use Macrolab\Clock;
 
         <label for="booking-start-date">Start</label>
         <div class="when">
-            <input id="booking-start-date" name="start_date" type="date" required>
+            <?= date_field('start_date', null, ['id' => 'booking-start-date', 'required' => true]) ?>
             <select id="booking-start-time" name="start_time" aria-label="Start time" required></select>
         </div>
         <p class="muted small when-echo" id="booking-start-echo"></p>
 
         <label for="booking-end-date">End</label>
         <div class="when">
-            <input id="booking-end-date" name="end_date" type="date" required>
+            <?= date_field('end_date', null, ['id' => 'booking-end-date', 'required' => true]) ?>
             <select id="booking-end-time" name="end_time" aria-label="End time" required></select>
         </div>
         <p class="muted small when-echo" id="booking-end-echo"></p>

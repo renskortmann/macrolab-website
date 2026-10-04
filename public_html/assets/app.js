@@ -11,7 +11,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         wireConfirmations(document);
         wireAutoSubmit();
-        wireDateEchoes();
+        wireDateFields();
         wireInviteLink();
         wireDayPicker();
         wireDaySheet();
@@ -55,24 +55,56 @@
     }
 
     /*
-     * A date input displays itself in the browser's locale, which may well put
-     * the month first. Each one names an element to spell its value out in,
-     * day first, so what was picked is never in doubt.
+     * Date fields (date_field() in helpers.php): a text field that shows and
+     * takes dates day first, 08-10-2026, plus a calendar button. The browser's
+     * own date input would show the browser's order - month first in an
+     * American one - so it only serves as the picker, out of sight. A field
+     * may name an element (data-echo) to spell the date out in, with weekday.
      */
-    function wireDateEchoes() {
-        document.querySelectorAll('input[type="date"][data-echo]').forEach(function (input) {
-            var echo = document.getElementById(input.dataset.echo);
-
-            if (!echo) {
-                return;
-            }
+    function wireDateFields() {
+        document.querySelectorAll('.date-field').forEach(function (wrap) {
+            var text = wrap.querySelector('.date-text');
+            var native = wrap.querySelector('.date-native');
+            var button = wrap.querySelector('.date-pick');
+            var echo = text.dataset.echo ? document.getElementById(text.dataset.echo) : null;
 
             var update = function () {
-                echo.textContent = input.value ? longDate(input.value) : '';
+                var iso = toIso(text.value);
+
+                /* Tidy what was typed (8/10/2026 becomes 08-10-2026), and let
+                   the form refuse what is not a date at all. */
+                if (iso) {
+                    text.value = toDmy(iso);
+                }
+                text.setCustomValidity(text.value.trim() !== '' && !iso
+                    ? 'Use day-month-year, for example 08-10-2026.' : '');
+                native.value = iso || '';
+                if (echo) {
+                    echo.textContent = iso ? longDate(iso) : '';
+                }
             };
 
-            input.addEventListener('change', update);
+            text.addEventListener('change', update);
             update();
+
+            native.addEventListener('change', function () {
+                text.value = toDmy(native.value);
+                /* So the echo, auto-submit and the booking dialog all notice. */
+                text.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+
+            if (button && typeof native.showPicker === 'function') {
+                button.hidden = false;
+                button.addEventListener('click', function () {
+                    native.value = toIso(text.value) || '';
+                    try {
+                        native.showPicker();
+                    } catch (err) {
+                        /* Refused, e.g. inside a cross-origin frame: type it. */
+                        text.focus();
+                    }
+                });
+            }
         });
     }
 
@@ -126,7 +158,9 @@
          * showing 09/14/2026 is never ambiguous.
          */
         function whenField(name) {
+            /* The day-first text field of a date_field(); see wireDateFields(). */
             var dateEl = document.getElementById('booking-' + name + '-date');
+            var pickEl = dateEl.closest('.date-field').querySelector('.date-pick');
             var timeEl = document.getElementById('booking-' + name + '-time');
             var echoEl = document.getElementById('booking-' + name + '-echo');
 
@@ -135,21 +169,25 @@
             var field = {
                 date: dateEl,
                 time: timeEl,
-                /* The combined local value, as the API expects it. */
+                /* The combined local value, as the API expects it: ISO. */
                 value: function () {
-                    return dateEl.value && timeEl.value ? dateEl.value + 'T' + timeEl.value : '';
+                    var iso = toIso(dateEl.value);
+                    return iso && timeEl.value ? iso + 'T' + timeEl.value : '';
                 },
                 set: function (date) {
-                    dateEl.value = isoDate(date);
+                    dateEl.value = toDmy(isoDate(date));
+                    dateEl.setCustomValidity('');
                     timeEl.value = nearestOption(timeEl, pad2(date.getHours()) + ':' + pad2(date.getMinutes()));
                     field.refresh();
                 },
                 refresh: function () {
-                    echoEl.textContent = dateEl.value ? longDate(dateEl.value) : '';
+                    var iso = toIso(dateEl.value);
+                    echoEl.textContent = iso ? longDate(iso) : '';
                 },
                 readOnly: function (readOnly) {
                     dateEl.readOnly = readOnly;
                     timeEl.disabled = readOnly;
+                    if (pickEl) { pickEl.disabled = readOnly; }
                 }
             };
 
@@ -676,6 +714,38 @@
     /* A Date as the value a date input expects. */
     function isoDate(date) {
         return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+    }
+
+    /*
+     * A date as typed - day first (08-10-2026, 8/10/2026, 8.10.2026) or ISO -
+     * as "YYYY-MM-DD", or null when it is not a real calendar date. The server
+     * reads dates the same way (Clock::isoDate()).
+     */
+    function toIso(text) {
+        var value = (text || '').trim();
+        var m;
+        var day, month, year;
+
+        if ((m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(value))) {
+            year = Number(m[1]); month = Number(m[2]); day = Number(m[3]);
+        } else if ((m = /^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/.exec(value))) {
+            day = Number(m[1]); month = Number(m[2]); year = Number(m[3]);
+        } else {
+            return null;
+        }
+
+        var date = new Date(year, month - 1, day);
+        if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+            return null;
+        }
+
+        return year + '-' + pad2(month) + '-' + pad2(day);
+    }
+
+    /* "2026-10-08" as the site shows dates: "08-10-2026". */
+    function toDmy(iso) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+        return m ? m[3] + '-' + m[2] + '-' + m[1] : '';
     }
 
     /*

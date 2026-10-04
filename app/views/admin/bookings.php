@@ -29,10 +29,9 @@ $timeField = static function (string $name, string $label, string $selected) use
     return $html . '</select>';
 };
 
-/** A date input that keeps a day-first echo of its value beside it. */
+/** A day-first date field that keeps a written-out echo of its value beside it. */
 $dateField = static function (string $name, string $label, string $value, string $echoId): string {
-    return '<input type="date" name="' . e($name) . '" aria-label="' . e($label) . '"'
-        . ' value="' . e($value) . '" data-echo="' . e($echoId) . '" required>';
+    return date_field($name, $value, ['aria-label' => $label, 'data-echo' => $echoId, 'required' => true]);
 };
 ?>
 <section class="card">
@@ -74,14 +73,14 @@ $dateField = static function (string $name, string $label, string $value, string
 
         <label for="start_date">Start</label>
         <span class="when">
-            <input id="start_date" name="start_date" type="date" data-echo="new-start-echo" required>
+            <?= date_field('start_date', null, ['id' => 'start_date', 'data-echo' => 'new-start-echo', 'required' => true]) ?>
             <?= $timeField('start_time', 'Start time', '09:00') ?>
             <span class="muted small" id="new-start-echo"></span>
         </span>
 
         <label for="end_date">End</label>
         <span class="when">
-            <input id="end_date" name="end_date" type="date" data-echo="new-end-echo" required>
+            <?= date_field('end_date', null, ['id' => 'end_date', 'data-echo' => 'new-end-echo', 'required' => true]) ?>
             <?= $timeField('end_time', 'End time', '17:00') ?>
             <span class="muted small" id="new-end-echo"></span>
         </span>

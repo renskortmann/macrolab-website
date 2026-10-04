@@ -215,7 +215,18 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 
 /* A date input beside the 24h time dropdown that goes with it. */
 .when { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
-.when input[type="date"] { width: auto; max-width: 11rem; }
+/* Day-first date fields (date_field() in helpers.php): the text field, a
+   calendar button, and the browser's date input kept out of sight but
+   rendered, because showPicker() refuses a hidden input. */
+.date-field { position: relative; display: inline-flex; align-items: center; gap: 0.3rem; }
+input[type="text"].date-text { width: 8.5rem; max-width: 8.5rem; }
+.date-native {
+    position: absolute; left: 0; bottom: 0;
+    width: 1px; height: 1px; padding: 0; border: 0;
+    opacity: 0; pointer-events: none;
+}
+.date-pick { padding: 0.45rem 0.55rem; line-height: 0; }
+.date-pick:disabled { opacity: 0.5; cursor: default; }
 .when select { width: auto; }
 .when-echo { margin: 0.25rem 0 0; }
 

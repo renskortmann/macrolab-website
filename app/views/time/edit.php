@@ -20,8 +20,7 @@ use Macrolab\Time\TimeRules;
         <?= Csrf::field() ?>
 
         <label for="worked_on">Day</label>
-        <input id="worked_on" name="worked_on" type="date" required data-echo
-               value="<?= e($entry->workedOnDate()) ?>">
+        <?= date_field('worked_on', $entry->workedOnDate(), ['id' => 'worked_on', 'required' => true]) ?>
 
         <label for="project_id">Activity</label>
         <select id="project_id" name="project_id" required>

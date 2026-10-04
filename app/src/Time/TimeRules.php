@@ -164,17 +164,20 @@ final class TimeRules
     }
 
     /**
-     * Parse a Y-m-d date into UTC midnight, or null.
+     * Parse a date - day first (08-10-2026) or ISO (2026-10-08) - into UTC
+     * midnight, or null.
      *
-     * Strict on purpose. createFromFormat alone rolls 2025-02-30 forward to
-     * 2 March rather than refusing it, so the warning count is checked too. The
-     * date input always submits Y-m-d, but the endpoint must not trust that.
+     * Strict on purpose: Clock::isoDate() refuses 30-02-2025 rather than
+     * rolling it forward to 2 March, and createFromFormat's warning count is
+     * still checked behind it. Whatever a form submits, the endpoint does not
+     * trust it.
      */
     public static function parseDate(string $value): ?DateTimeImmutable
     {
-        $value = trim($value);
+        // Day first as the site shows it (08-10-2026), or ISO from a link.
+        $value = Clock::isoDate($value);
 
-        if ($value === '') {
+        if ($value === null) {
             return null;
         }
 

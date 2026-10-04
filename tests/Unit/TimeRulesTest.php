@@ -76,6 +76,14 @@ final class TimeRulesTest extends TestCase
         self::assertNull(TimeRules::parseDate(''));
     }
 
+    public function testParseDateReadsTheDayFirstFormatTheSiteShows(): void
+    {
+        self::assertSame('2026-10-08', TimeRules::parseDate('08-10-2026')?->format('Y-m-d'));
+        // Not the American reading, which would be 10 August.
+        self::assertSame('2026-10-08', TimeRules::parseDate('08/10/2026')?->format('Y-m-d'));
+        self::assertNull(TimeRules::parseDate('30-02-2025'));
+    }
+
     public function testParseDateReadsAPlainDayAsUtcMidnight(): void
     {
         $date = TimeRules::parseDate('2026-09-17');
