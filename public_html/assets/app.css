@@ -63,6 +63,34 @@ body {
 .topbar nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .topbar .who { color: var(--ink-muted); }
 
+/* The destinations as tabs; the current page's is bold, in the accent colour,
+   with a bar under it (aria-current, set in layout.php). The hidden bold copy
+   of the label (::after) reserves the bold width, so tabs do not shift when
+   the current one changes. */
+.topbar a.tab {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.2rem 0.1rem;
+    border-bottom: 3px solid transparent;
+    color: var(--ink);
+    text-decoration: none;
+}
+.topbar a.tab::after {
+    content: attr(data-label);
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    font-weight: 600;
+}
+.topbar a.tab:hover { border-bottom-color: var(--line); }
+.topbar a.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.topbar a.tab[aria-current="page"] {
+    color: var(--accent);
+    font-weight: 600;
+    border-bottom-color: var(--accent);
+}
+
 main { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
 
 footer {

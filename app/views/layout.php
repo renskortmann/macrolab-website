@@ -8,6 +8,7 @@
 
 use Macrolab\Auth;
 use Macrolab\Config;
+use Macrolab\Context;
 use Macrolab\Csrf;
 use Macrolab\Navigation;
 use Macrolab\Session;
@@ -34,8 +35,15 @@ $flashes = Session::takeFlashes();
             <span class="who"><?= e($isAdmin ? 'Administrator' : $user->label()) ?></span>
 
             <?php /* One list, shared with the hub page. See Macrolab\Navigation. */ ?>
-            <?php foreach (Navigation::destinations(Auth::actor()) as $destination): ?>
-                <a href="<?= e(path($destination['href'])) ?>"><?= e($destination['label']) ?></a>
+            <?php
+            $destinations = Navigation::destinations(Auth::actor());
+            // The tab of the page being shown, marked so people see where they are.
+            $currentTab = Navigation::current($destinations, Context::request()?->path ?? '');
+            ?>
+            <?php foreach ($destinations as $destination): ?>
+                <a class="tab" href="<?= e(path($destination['href'])) ?>"
+                   data-label="<?= e($destination['label']) ?>"
+                   <?= $destination['href'] === $currentTab ? 'aria-current="page"' : '' ?>><?= e($destination['label']) ?></a>
             <?php endforeach; ?>
 
             <form method="post" action="<?= e(path($isAdmin ? '/admin/logout' : '/logout')) ?>" class="inline">

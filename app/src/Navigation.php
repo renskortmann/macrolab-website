@@ -16,6 +16,35 @@ namespace Macrolab;
 final class Navigation
 {
     /**
+     * Which destination the page at $path belongs to - the tab to mark as
+     * current in the top bar - or null (the hub, the sign-in page).
+     *
+     * A destination owns its own path and everything below it: /time/123 is
+     * Time registration. When two match, the longer one is more specific and
+     * wins: /time/overview is Time overview, not Time registration, and
+     * /admin/time is the admin's Time overview, not Administration.
+     *
+     * @param list<array{href: string, label: string, blurb: string}> $destinations
+     */
+    public static function current(array $destinations, string $path): ?string
+    {
+        $best = null;
+
+        foreach ($destinations as $destination) {
+            $href = $destination['href'];
+            $owns = $path === $href
+                || str_starts_with($path, $href . '/')
+                || str_starts_with($path, $href . '.');
+
+            if ($owns && ($best === null || strlen($href) > strlen($best))) {
+                $best = $href;
+            }
+        }
+
+        return $best;
+    }
+
+    /**
      * @return list<array{href: string, label: string, blurb: string}>
      */
     public static function destinations(?Actor $actor): array
@@ -63,7 +92,7 @@ final class Navigation
             $destinations[] = [
                 'href'  => '/time',
                 'label' => 'Time registration',
-                'blurb' => 'Log your hours on the activities under the general lab code.',
+                'blurb' => 'Log your hours on the activities under the general lab code. This function is only available to lab technicians and manager, not to regular lab users.',
             ];
         }
 

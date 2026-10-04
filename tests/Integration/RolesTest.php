@@ -11,6 +11,7 @@ use Macrolab\Controller\AdminTimeController;
 use Macrolab\Controller\CalendarController;
 use Macrolab\Controller\TimeApiController;
 use Macrolab\Controller\TimeController;
+use Macrolab\Context;
 use Macrolab\Csrf;
 use Macrolab\Db;
 use Macrolab\Http\HttpException;
@@ -57,7 +58,13 @@ final class RolesTest extends DatabaseTestCase
         $this->signInAs('rosa', Role::LabTechnician);
 
         self::assertSame(['/booking', '/time', '/account'], $this->destinations());
-        self::assertSame(200, (new TimeController())->show(new Request('GET', '/time'))->status);
+
+        $request = new Request('GET', '/time');
+        Context::setRequest($request);
+        $page = (new TimeController())->show($request);
+        self::assertSame(200, $page->status);
+        self::assertMatchesRegularExpression('#href="/time"\s+data-label="Time registration"\s+aria-current="page"#',
+            $page->body, 'the Time registration tab is current');
 
         $this->assertForbidden(fn () => $this->overview());
         $this->assertForbidden(fn () => (new AdminTimeController())->export(new Request('GET', '/time/overview.csv')));
@@ -72,6 +79,9 @@ final class RolesTest extends DatabaseTestCase
 
         $page = $this->overview();
         self::assertSame(200, $page->status);
+        self::assertSame(1, substr_count($page->body, 'aria-current="page"'), 'one tab is current');
+        self::assertMatchesRegularExpression('#href="/time/overview"\s+data-label="Time overview"\s+aria-current="page"#',
+            $page->body, 'and it is Time overview, not Time registration');
         self::assertStringContainsString('action="/time/overview"', $page->body, 'the filter stays on the manager path');
         self::assertStringContainsString('/time/overview.csv?', $page->body, 'and so do the export links');
         self::assertStringContainsString('<div class="filter-fields">', $page->body, 'the filter is laid out as a grid');
@@ -141,7 +151,10 @@ final class RolesTest extends DatabaseTestCase
 
     private function overview(): \Macrolab\Http\Response
     {
-        return (new AdminTimeController())->entries(new Request('GET', '/time/overview'));
+        $request = new Request('GET', '/time/overview');
+        Context::setRequest($request);
+
+        return (new AdminTimeController())->entries($request);
     }
 
     private function assertForbidden(callable $call): void
