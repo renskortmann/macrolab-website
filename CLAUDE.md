@@ -249,15 +249,15 @@ To do:
    in the hub or top bar, and is refused at `/time`; a lab technician can
    register time but is not shown the time overview; a lab manager downloaded
    the time CSV.
-9. **"Equipment" rename (pending deploy):** "machine"/"instrument"/"resource"
-   became "equipment" ("piece of equipment" for one) in the UI, docs, code
-   (`Booking\Equipment`, `equipmentId`, API field `equipment`) and database
-   (migration `005_equipment.sql`: table `equipment`, `bookings.equipment_id`,
-   audit actions `equipment_*`). Old addresses `/admin/machines` and
-   `/booking?machine=` were dropped on purpose. Deploy: export the database
-   first; Pull + Deploy; PHP Composer **Install** (class renamed); then sign in
-   at `/admin/login` and go straight to `/admin/system` (the dashboard fails
-   until the migration runs) and apply the migration.
+9. ~~"Equipment" rename~~ - live 2026-10-04: "machine"/"instrument"/
+   "resource" became "equipment" ("piece of equipment" for one) in the UI,
+   docs, code (`Booking\Equipment`, `equipmentId`, API field `equipment`) and
+   database (migration `005_equipment.sql`: table `equipment`,
+   `bookings.equipment_id`, audit actions `equipment_*`). Old addresses
+   `/admin/machines` and `/booking?machine=` were dropped on purpose. Deployed
+   as: database export, Pull + Deploy, PHP Composer Install, then
+   `/admin/system` -> Apply migrations. Checked: `/admin/equipment`, a booking
+   (dialog shows "Equipment: LUNA OD6"), and the renamed audit entries.
 10. Next time: backups (ask ICT about server-level backups first; see item 3).
    Until then, export the database from phpMyAdmin before each release that
    brings a migration.
