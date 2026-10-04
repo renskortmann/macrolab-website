@@ -62,8 +62,8 @@ Layout on the server, with the repo deployed to the subscription root `/`:
 ```
 
 `public_html/index.php` detects `app/` one level above itself, so nothing
-needs configuring. The old `httpdocs/` folder is unused and can be deleted
-once everything works.
+needs configuring. Plesk's original `httpdocs/` folder was deleted on
+2026-10-04.
 
 Plesk -> Git -> Create repository settings:
 - **Remote repository**, URL = the GitHub repo. If it is private, Plesk shows an
@@ -234,15 +234,14 @@ To do:
 5. ~~Idle limit~~ - verified on the live site 2026-10-03 after the fix: after
    25 idle minutes the admin was asked to sign in again. (The Plesk panel has
    its own, unrelated idle timeout, 30 minutes by default.)
-6. `httpdocs/` (Plesk's original document root) was renamed to
-   `httpdocs.unused` on 2026-10-03 and can now be deleted: Let's Encrypt put
-   its `.well-known/` into `public_html/` when it issued the certificate
-   (2026-10-02), so renewal uses the current document root. Keep
+6. ~~`httpdocs/`~~ - Plesk's original document root, deleted 2026-10-04
+   (Let's Encrypt uses `public_html/.well-known/`). Keep
    `public_html/.well-known/` and Plesk's `public_html/cgi-bin/`.
-7. Next time: backups (ask ICT about server-level backups first; see item 3)
-   and the first real users (allowlist, set-up links, activities; then a
-   real sign-in at `/login`, a booking and a time entry, to confirm the
-   firewall stays quiet in ordinary use).
+7. ~~First real use~~ - 2026-10-04: activities and machines added in the
+   admin views; as a member, bookings made and cancelled, time entries made,
+   changed and deleted. All of it appears in the admin views and the audit
+   log, and the firewall did not interfere.
+8. Next time: backups (ask ICT about server-level backups first; see item 3).
 
 ## Updates after go-live
 
