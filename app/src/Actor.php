@@ -36,4 +36,16 @@ final class Actor
     {
         return $this->isAdmin ? 'Administrator' : ($this->user?->label() ?? 'unknown');
     }
+
+    /** Their own timesheet: lab technicians and lab managers. The admin keeps none. */
+    public function canRegisterTime(): bool
+    {
+        return $this->user !== null && $this->user->role->canRegisterTime();
+    }
+
+    /** Everyone's time, read-only: the administrator and lab managers. */
+    public function canViewAllTime(): bool
+    {
+        return $this->isAdmin || ($this->user !== null && $this->user->role->canViewAllTime());
+    }
 }

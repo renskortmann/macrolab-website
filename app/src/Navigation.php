@@ -51,22 +51,36 @@ final class Navigation
             ];
         }
 
-        return [
-            [
-                'href'  => '/booking',
-                'label' => 'Booking',
-                'blurb' => 'Book time on a lab instrument, and change or cancel your own bookings.',
-            ],
-            [
+        // Every member books machines; the role adds the time pages. A lab user
+        // is not shown time registration at all (and is refused at /time).
+        $destinations = [[
+            'href'  => '/booking',
+            'label' => 'Booking',
+            'blurb' => 'Book time on a lab instrument, and change or cancel your own bookings.',
+        ]];
+
+        if ($actor->canRegisterTime()) {
+            $destinations[] = [
                 'href'  => '/time',
                 'label' => 'Time registration',
                 'blurb' => 'Log your hours on the activities under the general lab code.',
-            ],
-            [
-                'href'  => '/account',
-                'label' => 'My account',
-                'blurb' => 'Your upcoming bookings, and your password.',
-            ],
+            ];
+        }
+
+        if ($actor->canViewAllTime()) {
+            $destinations[] = [
+                'href'  => '/time/overview',
+                'label' => 'Time overview',
+                'blurb' => 'What everyone has logged, with filters and a CSV export.',
+            ];
+        }
+
+        $destinations[] = [
+            'href'  => '/account',
+            'label' => 'My account',
+            'blurb' => 'Your upcoming bookings, and your password.',
         ];
+
+        return $destinations;
     }
 }

@@ -1,10 +1,12 @@
 <?php
 /**
- * The administrator's read-only view of what everyone has logged.
+ * The read-only view of what everyone has logged, for the administrator (at
+ * /admin/time) and for lab managers (at /time/overview).
  *
  * Read-only on purpose: there is no approval step, and nobody edits somebody
  * else's timesheet. See Macrolab\Time\TimeEntryPolicy.
  *
+ * @var string                                     $basePath  /admin/time or /time/overview
  * @var \Macrolab\Time\TimeFilter                  $filter
  * @var list<\Macrolab\Time\TimeEntry>             $entries
  * @var array{entries: int, minutes: int}          $totals
@@ -18,7 +20,7 @@ use Macrolab\Time\TimeRules;
 <section class="card">
     <h1>Time overview</h1>
 
-    <form method="get" action="<?= e(path('/admin/time')) ?>" class="row">
+    <form method="get" action="<?= e(path($basePath)) ?>" class="row">
         <label for="from">From</label>
         <input id="from" name="from" type="date" data-echo value="<?= e($filter->from->format('Y-m-d')) ?>">
 
@@ -57,9 +59,9 @@ use Macrolab\Time\TimeRules;
 
     <p>
         Export these rows as CSV:
-        <a href="<?= e(path('/admin/time.csv?' . $filter->queryString() . '&sep=semicolon')) ?>">with semicolons</a>
+        <a href="<?= e(path($basePath . '.csv?' . $filter->queryString() . '&sep=semicolon')) ?>">with semicolons</a>
         or
-        <a href="<?= e(path('/admin/time.csv?' . $filter->queryString() . '&sep=comma')) ?>">with commas</a>
+        <a href="<?= e(path($basePath . '.csv?' . $filter->queryString() . '&sep=comma')) ?>">with commas</a>
     </p>
 
     <p class="muted small">

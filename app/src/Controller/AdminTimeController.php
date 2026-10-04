@@ -21,12 +21,14 @@ use Macrolab\View;
 use RuntimeException;
 
 /**
- * The administrator's side of time registration: the project list they
- * maintain, and a read-only view of what everyone has logged.
+ * The managing side of time registration: the project list the administrator
+ * maintains, and a read-only view of what everyone has logged, with its CSV
+ * export. Lab managers get the overview and the export too, at /time/overview;
+ * the project list stays the administrator's.
  *
  * Read-only is the point. There is no approval step and no editing of anyone
- * else's timesheet - see TimeEntryPolicy, which refuses the administrator
- * deliberately.
+ * else's timesheet - see TimeEntryPolicy, which refuses everyone but the
+ * entry's owner deliberately.
  *
  * Separate from AdminController because that class is already long enough that
  * finding anything in it is work.
@@ -60,12 +62,15 @@ final class AdminTimeController
 
     public function entries(Request $request): Response
     {
-        Auth::requireAdmin();
+        Auth::requireTimeOverview();
 
         $filter = TimeFilter::fromRequest($request);
 
         return View::page('admin/time', [
             'title'     => 'Time overview',
+            // /admin/time for the administrator, /time/overview for a lab
+            // manager: the filter and the export links stay on the same path.
+            'basePath'  => $request->path === '/time/overview' ? '/time/overview' : '/admin/time',
             'filter'    => $filter,
             'entries'   => TimeEntries::search($filter),
             'totals'    => TimeEntries::totals($filter),
@@ -77,7 +82,7 @@ final class AdminTimeController
 
     public function export(Request $request): Response
     {
-        Auth::requireAdmin();
+        Auth::requireTimeOverview();
 
         $filter = TimeFilter::fromRequest($request);
         $entries = TimeEntries::search($filter, 5000);

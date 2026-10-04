@@ -15,8 +15,9 @@ layout and the audit log - nothing else. No table, class or page of one refers
 to the other, and the code is split accordingly (`app/src/Booking/`,
 `app/src/Time/`; see [Layout](#layout)).
 
-Signing in lands on the **hub** at `/`, which links to both. One administrator
-controls who may sign in, manages the machines and the booking rules, can
+Signing in lands on the **hub** at `/`, which links to what the member's role
+allows (see [Roles](#roles)). One administrator controls who may sign in and
+with which role, manages the machines and the booking rules, can
 create, change or delete any booking, maintains the list of activities time is
 logged against, and reads what everyone has logged (see
 [Time registration](#time-registration)).
@@ -30,6 +31,23 @@ logged against, and reads what everyone has logged (see
 
 The administrator's own sign-in never goes through SSO, so the lab keeps access
 even when SSO is unavailable.
+
+### Roles
+
+Every member account has one of three roles, set by the administrator under
+**Who may sign in**:
+
+| Role | Booking | Own time registration | Everyone's time (read-only, CSV) |
+|---|---|---|---|
+| **Lab user** | yes | - | - |
+| **Lab technician** | yes | yes | - |
+| **Lab manager** | yes | yes | yes, at `/time/overview` |
+
+The hub and the top bar show only what the role allows, and the pages refuse
+anyone whose role does not include them (403). A role change applies on the
+member's next click. New accounts default to lab user; accounts that existed
+before roles were introduced became lab technicians. Managing the activity
+list stays with the administrator, who is not a member and has no role.
 
 ### Two separate sign-in pages
 
@@ -344,10 +362,12 @@ so include it or keep its values in a password manager.
    the same after a release that adds or moves classes under `app/src/`: it
    refreshes the optimised class map. (Classes missing from the map are still
    found by their folder, so the site keeps working in the meantime.)
-4. If the release adds a database migration, apply it from
-   **Administration** → **System** → *Apply migrations*. That page is behind
-   your own sign-in, so it needs no install token and stays available for the
-   life of the installation.
+4. If the release adds a database migration, apply it **straight away** from
+   **Administration** → **System** → *Apply migrations*. New code may expect
+   the new columns, so members can get errors until it is applied; the
+   administration pages keep working. That page is behind your own sign-in,
+   so it needs no install token and stays available for the life of the
+   installation.
 
 A deployment never overwrites `app/config.php` or `vendor/`.
 
@@ -383,7 +403,8 @@ let you write beside the document root.
 
 ### Giving someone access
 
-**Who may sign in** → enter their netID → you get a single-use link. Send it
+**Who may sign in** → enter their netID and choose a role (lab user,
+technician or manager; see [Roles](#roles)) → you get a single-use link. Send it
 however you like: Teams, email, in person. They open it, choose a password, and
 sign in. You never see their password.
 
@@ -560,8 +581,8 @@ The screens say **activities**, but the code, the database, the URL
 `/admin/projects` and the audit log action names still say **projects**
 (`Project`, `projects` table, `project_added`). They are the same thing. The
 administrator keeps the list at `/admin/projects`, and every entry names one
-activity, with an optional code of its own. There are no roles, so any signed-in member can open `/time`; who is expected
-to register time is a lab arrangement, not something the application enforces.
+activity, with an optional code of its own. Only lab technicians and lab
+managers can open `/time`; lab users are not shown it (see [Roles](#roles)).
 
 **This system is not connected to the booking system.** A time entry names an
 activity and never a machine. The two halves share the sign-in and nothing else,
@@ -574,10 +595,12 @@ and only their own. A request naming somebody else's entry is refused with 403
 and recorded, the same discipline the bookings use.
 
 The administrator maintains the activity list at `/admin/projects` and reads
-what everyone has logged at `/admin/time`, filtered by person, activity and
-date range, with a CSV export of exactly those rows (columns `date`, `netid`,
-`name`, `activity`, `activity_code`, `hours`, `minutes`, `note`, `entry_id`). That view is **read-only**:
-there is no approval step, and nobody edits somebody else's timesheet.
+what everyone has logged at `/admin/time`; lab managers get the same overview
+at `/time/overview`. It filters by person, activity and date range, with a CSV
+export of exactly those rows (columns `date`, `netid`, `name`, `activity`,
+`activity_code`, `hours`, `minutes`, `note`, `entry_id`), separated by commas
+or by semicolons. That view is **read-only**: there is no approval step, and
+nobody edits somebody else's timesheet.
 
 An activity with time on record cannot be deleted, only retired - the same
 reasoning as retiring a machine. For the same reason, an account with time
@@ -622,7 +645,8 @@ Shared (`app/src/`):
 
 | Class | What it is for |
 |---|---|
-| `Auth`, `Actor` | who is signed in; the allowlist gate |
+| `Auth`, `Actor` | who is signed in; the allowlist gate; what the role allows |
+| `Role` | lab user, lab technician, lab manager, and what each may use |
 | `Auth\LocalProvider` | stage 1 password sign-in |
 | `Auth\ProviderInterface` | the seam TU Delft SSO will slot into (stage 2, not built yet) |
 | `Invite` | single-use links for setting a password |

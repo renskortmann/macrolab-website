@@ -13,7 +13,7 @@ use Macrolab\Auth\Identity;
  */
 final class Users
 {
-    private const COLUMNS = 'id, netid, display_name, email, status, password_hash,
+    private const COLUMNS = 'id, netid, display_name, email, status, role, password_hash,
                              saml_name_id, note, created_at, first_login_at, last_login_at';
 
     public static function findByNetid(string $netid): ?User
@@ -41,7 +41,7 @@ final class Users
     public static function listAll(): array
     {
         return Db::get()->all(
-            'SELECT u.id, u.netid, u.display_name, u.email, u.status,
+            'SELECT u.id, u.netid, u.display_name, u.email, u.status, u.role,
                     u.password_hash IS NOT NULL AS has_password,
                     u.note, u.created_at, u.first_login_at, u.last_login_at,
                     (SELECT COUNT(*) FROM bookings b
@@ -61,8 +61,12 @@ final class Users
      * Add a netID to the allowlist. The account has no password yet; the admin
      * hands out an invite link, and the user chooses their own.
      */
-    public static function create(string $netid, ?string $displayName = null, ?string $note = null): User
-    {
+    public static function create(
+        string $netid,
+        ?string $displayName = null,
+        ?string $note = null,
+        Role $role = Role::LabUser,
+    ): User {
         $netid = self::normaliseNetid($netid);
 
         Db::get()->insert('users', [
@@ -70,6 +74,7 @@ final class Users
             'display_name' => $displayName !== '' ? $displayName : null,
             'note'         => $note !== '' ? $note : null,
             'status'       => 'approved',
+            'role'         => $role->value,
             'created_at'   => Clock::sql(),
         ]);
 
@@ -93,6 +98,11 @@ final class Users
     public static function setStatus(int $userId, string $status): void
     {
         Db::get()->update('users', ['status' => $status], 'id = ?', [$userId]);
+    }
+
+    public static function setRole(int $userId, Role $role): void
+    {
+        Db::get()->update('users', ['role' => $role->value], 'id = ?', [$userId]);
     }
 
     public static function updateProfile(int $userId, ?string $displayName, ?string $note): void

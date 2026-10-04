@@ -8,14 +8,17 @@
 
 use Macrolab\Clock;
 use Macrolab\Csrf;
+use Macrolab\Role;
 ?>
 <section class="card">
     <h1>Who may sign in</h1>
 
     <p class="muted small">
         This list is the access control. A netID that is not here cannot sign
-        in - by password today, and by TU Delft SSO later - and cannot see or
-        make bookings.
+        in - by password today, and by TU Delft SSO later. The role decides what
+        a person may use: every role books machines, a <em>lab technician</em>
+        also registers their own time, and a <em>lab manager</em> also sees and
+        exports everyone's time.
     </p>
 
     <?php if ($error !== null): ?>
@@ -50,6 +53,15 @@ use Macrolab\Csrf;
         <label for="note">Note <span class="muted">(optional)</span></label>
         <input id="note" name="note" type="text" placeholder="trained 2026-09-01">
 
+        <label for="role">Role</label>
+        <select id="role" name="role">
+            <?php foreach (Role::cases() as $role): ?>
+                <option value="<?= e($role->value) ?>" <?= $role === Role::LabUser ? 'selected' : '' ?>>
+                    <?= e($role->label()) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
         <button type="submit" class="primary">Add and create a link</button>
     </form>
 </section>
@@ -63,7 +75,7 @@ use Macrolab\Csrf;
         <table class="wide">
             <thead>
             <tr>
-                <th>netID</th><th>Name</th><th>Status</th><th>Password</th>
+                <th>netID</th><th>Name</th><th>Role</th><th>Status</th><th>Password</th>
                 <th>Bookings</th><th>Time entries</th><th>Last signed in</th><th>Actions</th>
             </tr>
             </thead>
@@ -76,6 +88,21 @@ use Macrolab\Csrf;
                         <?php if (!empty($row['note'])): ?>
                             <br><span class="muted small"><?= e($row['note']) ?></span>
                         <?php endif; ?>
+                    </td>
+                    <td>
+                        <form method="post" action="<?= e(path('/admin/users')) ?>" class="inline">
+                            <?= Csrf::field() ?>
+                            <input type="hidden" name="user_id" value="<?= e($row['id']) ?>">
+                            <select name="role" aria-label="Role of <?= e($row['netid']) ?>">
+                                <?php foreach (Role::cases() as $role): ?>
+                                    <option value="<?= e($role->value) ?>"
+                                        <?= $role->value === $row['role'] ? 'selected' : '' ?>>
+                                        <?= e($role->label()) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="submit" name="action" value="role" class="link">Change</button>
+                        </form>
                     </td>
                     <td><?= e($row['status']) ?></td>
                     <td>

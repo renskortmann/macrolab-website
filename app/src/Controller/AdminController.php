@@ -25,6 +25,7 @@ use Macrolab\Migrator;
 use Macrolab\Password;
 use Macrolab\Qr;
 use Macrolab\RateLimit;
+use Macrolab\Role;
 use Macrolab\Booking\Resources;
 use Macrolab\Session;
 use Macrolab\Settings;
@@ -228,8 +229,9 @@ final class AdminController
                 throw new RuntimeException('"' . $netid . '" is already on the list.');
             }
 
-            $user = Users::create($netid, $request->post('display_name'), $request->post('note'));
-            Audit::log('user_added', 'user', $user->id, ['netid' => $netid]);
+            $role = self::roleFrom($request);
+            $user = Users::create($netid, $request->post('display_name'), $request->post('note'), $role);
+            Audit::log('user_added', 'user', $user->id, ['netid' => $netid, 'role' => $role->value]);
 
             // Straight into an invite link, because an account with no password
             // and no link is of no use to anyone.
@@ -269,6 +271,21 @@ final class AdminController
 
                 return null;
 
+            case 'role':
+                $role = self::roleFrom($request);
+
+                if ($role !== $user->role) {
+                    Users::setRole($user->id, $role);
+                    Audit::log('user_role_changed', 'user', $user->id, [
+                        'netid' => $user->netid,
+                        'from'  => $user->role->value,
+                        'to'    => $role->value,
+                    ]);
+                }
+                Session::flash('success', $user->netid . ' is now a ' . strtolower($role->label()) . '.');
+
+                return null;
+
             case 'update':
                 Users::updateProfile($user->id, $request->post('display_name'), $request->post('note'));
                 Audit::log('user_updated', 'user', $user->id, ['netid' => $user->netid]);
@@ -304,6 +321,18 @@ final class AdminController
             default:
                 throw new RuntimeException('Unknown action.');
         }
+    }
+
+    /** The role chosen in a form, refusing anything that is not one. */
+    private static function roleFrom(Request $request): Role
+    {
+        $role = Role::tryFrom((string) ($request->post('role', '') ?? ''));
+
+        if ($role === null) {
+            throw new RuntimeException('Choose a role: lab user, lab technician or lab manager.');
+        }
+
+        return $role;
     }
 
     // ---------------------------------------------------------------- machines

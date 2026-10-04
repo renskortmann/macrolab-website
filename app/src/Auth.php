@@ -200,6 +200,34 @@ final class Auth
         return $user;
     }
 
+    /**
+     * A member whose role includes time registration. Signed out is a 401
+     * (back to the sign-in page); a lab user or the administrator - who keeps
+     * no timesheet - is a 403, not a confusing bounce to the member sign-in.
+     */
+    public static function requireTimeRegistration(): Actor
+    {
+        $actor = self::requireActor();
+
+        if (!$actor->canRegisterTime()) {
+            throw HttpException::forbidden('Time registration is for lab technicians and lab managers.');
+        }
+
+        return $actor;
+    }
+
+    /** The administrator or a lab manager: everyone's time, read-only. */
+    public static function requireTimeOverview(): Actor
+    {
+        $actor = self::requireActor();
+
+        if (!$actor->canViewAllTime()) {
+            throw HttpException::forbidden('The time overview is for lab managers and the administrator.');
+        }
+
+        return $actor;
+    }
+
     public static function requireAdmin(): void
     {
         if (!self::isAdmin()) {

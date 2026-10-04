@@ -17,6 +17,7 @@ final class User
         public readonly ?string $displayName,
         public readonly ?string $email,
         public readonly string $status,
+        public readonly Role $role = Role::LabUser,
         public readonly ?string $passwordHash = null,
         public readonly ?string $samlNameId = null,
         public readonly ?string $note = null,
@@ -36,6 +37,8 @@ final class User
             displayName: $row['display_name'] !== null ? (string) $row['display_name'] : null,
             email: $row['email'] !== null ? (string) $row['email'] : null,
             status: (string) $row['status'],
+            // An unknown or missing value means the least access.
+            role: Role::tryFrom((string) ($row['role'] ?? '')) ?? Role::LabUser,
             passwordHash: isset($row['password_hash']) && $row['password_hash'] !== null
                 ? (string) $row['password_hash'] : null,
             samlNameId: isset($row['saml_name_id']) && $row['saml_name_id'] !== null

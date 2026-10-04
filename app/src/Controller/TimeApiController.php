@@ -27,7 +27,7 @@ final class TimeApiController
     /** POST /api/time/cell  {day, project_id, hours, note} */
     public function saveCell(Request $request): Response
     {
-        $actor = Auth::requireActor();
+        $actor = Auth::requireTimeRegistration();
         Csrf::verify($request);
 
         $day = TimeRules::parseDate($request->post('day', '') ?? '');
@@ -71,7 +71,7 @@ final class TimeApiController
     /** GET /api/time/month?day=&month= - the month list, as rendered HTML. */
     public function month(Request $request): Response
     {
-        $user = Auth::requireUser();
+        $user = Auth::requireTimeRegistration()->user;
         $day = TimeController::day($request) ?? TimeRules::today();
 
         return Response::html(View::render(

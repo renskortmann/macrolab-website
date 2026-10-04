@@ -46,7 +46,7 @@ final class TimeController
             return Response::redirect('/admin/time');
         }
 
-        $user = Auth::requireUser();
+        $user = Auth::requireTimeRegistration()->user;
         $rules = TimeRuleSet::fromSettings();
         $today = TimeRules::today();
         $day = self::day($request) ?? $today;
@@ -115,7 +115,7 @@ final class TimeController
 
     public function edit(Request $request, string $id): Response
     {
-        $actor = Auth::requireActor();
+        $actor = Auth::requireTimeRegistration();
         $entry = $this->entryOr404($id);
 
         // The 403 for somebody else's entry, decided on the loaded row.
@@ -160,7 +160,7 @@ final class TimeController
     {
         Csrf::verify($request);
 
-        $actor = Auth::requireActor();
+        $actor = Auth::requireTimeRegistration();
         $entry = $this->entryOr404($id);
 
         TimeEntryService::delete($actor, $entry);

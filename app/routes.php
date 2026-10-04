@@ -37,6 +37,11 @@ $router->post('/api/bookings/{id}/cancel', [BookingApiController::class, 'cancel
 // ---------------------------------------------------------- time registration
 // Unrelated to the booking system above; the two share only the sign-in.
 $router->get('/time', [TimeController::class, 'show']);
+// Everyone's time, for lab managers - the same page and export the
+// administrator has at /admin/time. Before /time/{id}, which would otherwise
+// take "overview" for an entry id.
+$router->get('/time/overview', [AdminTimeController::class, 'entries']);
+$router->get('/time/overview.csv', [AdminTimeController::class, 'export']);
 $router->form('/time/{id}', [TimeController::class, 'edit']);
 $router->post('/time/{id}/delete', [TimeController::class, 'delete']);
 
