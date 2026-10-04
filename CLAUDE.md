@@ -156,7 +156,7 @@ prefix. Name, user (it contains a hyphen; quote it in config.php) and password
 are in the user's password manager. The database is empty until `/install`
 runs.
 
-## Deployment status (as of 2026-10-03)
+## Deployment status (as of 2026-10-04)
 
 **Live.** `macrolab.citg.tudelft.nl` is a CNAME to the shared hosting server
 (ICT created it; the zone is not managed in Plesk). A Let's Encrypt certificate
@@ -258,7 +258,16 @@ To do:
    as: database export, Pull + Deploy, PHP Composer Install, then
    `/admin/system` -> Apply migrations. Checked: `/admin/equipment`, a booking
    (dialog shows "Equipment: LUNA OD6"), and the renamed audit entries.
-10. Next time: backups (ask ICT about server-level backups first; see item 3).
+10. ~~Day-first dates~~ - live 2026-10-04: every date field shows and takes
+    dd-mm-yyyy (`date_field()` in `app/src/helpers.php`: a text field plus a
+    calendar button that opens the browser's own picker), because browsers
+    render `<input type="date">` in the browser's language (month first in a
+    US-English one) and a page cannot override that. The server reads dates
+    with `Clock::isoDate()` (day first or ISO, never American). Links and the
+    CSV export keep ISO dates on purpose. Tested on the live site: booking
+    dialog, calendar button, typed dates, time overview filter, time-entry
+    edit.
+11. Next time: backups (ask ICT about server-level backups first; see item 3).
    Until then, export the database from phpMyAdmin before each release that
    brings a migration.
 
