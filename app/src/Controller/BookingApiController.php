@@ -20,6 +20,7 @@ use Macrolab\Http\Request;
 use Macrolab\Http\Response;
 use Macrolab\Booking\Equipment;
 use Macrolab\Users;
+use Macrolab\View;
 
 /**
  * The JSON API the calendar talks to.
@@ -56,6 +57,20 @@ final class BookingApiController
             static fn (Booking $b): array => self::toEvent($b, $actor),
             $bookings
         ));
+    }
+
+    /**
+     * GET /api/bookings/mine - the member's upcoming bookings, rendered as the
+     * list under the calendar, so it can be refreshed after a change.
+     */
+    public function mine(Request $request): Response
+    {
+        $actor = Auth::requireActor();
+        $userId = $actor->userId();
+
+        return Response::html(View::render('my_bookings', [
+            'bookings' => $userId === null ? [] : Bookings::forUser($userId),
+        ]));
     }
 
     /** POST /api/bookings */

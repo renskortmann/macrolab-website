@@ -65,8 +65,7 @@ use Macrolab\View;
         <table class="day-sheet<?= $isWeekend ? ' is-weekend' : '' ?>" id="day-sheet"
                data-day="<?= e($day->format('Y-m-d')) ?>"
                data-csrf="<?= e(Csrf::token()) ?>"
-               data-cell-url="<?= e(path('/api/time/cell')) ?>"
-               data-month-url="<?= e(path('/api/time/month')) ?>">
+               data-cell-url="<?= e(path('/api/time/cell')) ?>">
             <thead>
             <tr>
                 <th>Activity</th>

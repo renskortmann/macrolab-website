@@ -63,26 +63,39 @@ final class TimeController
             'isOpen'     => TimeRules::isOpenForLogging($rules, $day, $today),
             'rows'       => $rows,
             'rules'      => $rules,
-            'month'      => self::monthData($user->id, self::month($request, $day), $day),
+            // The month list starts folded, unless the visitor came here by
+            // stepping through months (without the script, that reloads the page).
+            'month'      => self::monthData($user->id, self::month($request, $day), $day,
+                $request->query('month') !== null),
         ]);
     }
 
     /**
      * What the month list at the bottom of the page needs. Shared with the
-     * endpoint that re-renders that list after a cell is saved.
+     * endpoint that re-renders that list after a cell is saved or a month
+     * arrow is clicked.
      *
      * @return array<string, mixed>
      */
-    public static function monthData(int $userId, DateTimeImmutable $month, DateTimeImmutable $day): array
-    {
+    public static function monthData(
+        int $userId,
+        DateTimeImmutable $month,
+        DateTimeImmutable $day,
+        bool $open = false,
+    ): array {
         $entries = TimeEntries::forUser($userId, $month, $month->modify('last day of this month'));
+        $prev = $month->modify('-1 month');
+        $next = $month->modify('+1 month');
 
         return [
             'entries'      => $entries,
             'month'        => $month,
+            'open'         => $open,
             'day'          => $day->format('Y-m-d'),
-            'prevMonth'    => $month->modify('-1 month')->format('Y-m'),
-            'nextMonth'    => $month->modify('+1 month')->format('Y-m'),
+            'prevMonth'    => $prev->format('Y-m'),
+            'nextMonth'    => $next->format('Y-m'),
+            'prevLabel'    => $prev->format('F Y'),
+            'nextLabel'    => $next->format('F Y'),
             'totalMinutes' => array_sum(array_map(static fn (TimeEntry $e): int => $e->minutes, $entries)),
             'byProject'    => self::byProject($entries),
         ];

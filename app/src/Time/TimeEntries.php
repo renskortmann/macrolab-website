@@ -35,7 +35,7 @@ final class TimeEntries
     {
         $rows = Db::get()->all(
             self::SELECT . ' WHERE t.user_id = ? AND t.worked_on >= ? AND t.worked_on <= ?
-                          ORDER BY t.worked_on DESC, t.id DESC',
+                          ORDER BY t.worked_on, p.name, t.id',
             [$userId, $from->format('Y-m-d'), $to->format('Y-m-d')]
         );
 
@@ -99,7 +99,9 @@ final class TimeEntries
     }
 
     /**
-     * The administrator's filtered view.
+     * Everyone's time as filtered on the overview (administrator and lab
+     * managers), oldest first. The CSV export lists the same rows in the same
+     * order.
      *
      * @return list<TimeEntry>
      */
@@ -108,7 +110,7 @@ final class TimeEntries
         [$where, $params] = $filter->toSql();
 
         $rows = Db::get()->all(
-            self::SELECT . $where . ' ORDER BY t.worked_on DESC, u.netid, t.id DESC
+            self::SELECT . $where . ' ORDER BY t.worked_on, u.netid, t.id
                                       LIMIT ' . max(1, min(5000, $limit)),
             $params
         );

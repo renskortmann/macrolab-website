@@ -71,6 +71,9 @@ final class AdminTimeController
             // /admin/time for the administrator, /time/overview for a lab
             // manager: the filter and the export links stay on the same path.
             'basePath'  => $request->path === '/time/overview' ? '/time/overview' : '/admin/time',
+            // Just filtered (the Show button at the bottom): open the list at
+            // the top so the result is in view. A plain visit starts folded.
+            'filtered'  => array_intersect_key($request->query, array_flip(['from', 'to', 'user', 'project'])) !== [],
             'filter'    => $filter,
             'entries'   => TimeEntries::search($filter),
             'totals'    => TimeEntries::totals($filter),

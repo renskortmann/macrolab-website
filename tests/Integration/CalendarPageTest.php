@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Macrolab\Tests\Integration;
 
+use Macrolab\Actor;
 use Macrolab\Auth;
 use Macrolab\Auth\Identity;
+use Macrolab\Booking\BookingService;
 use Macrolab\Booking\Equipment;
+use Macrolab\Controller\AccountController;
+use Macrolab\Controller\BookingApiController;
 use Macrolab\Controller\CalendarController;
 use Macrolab\Http\Request;
 use Macrolab\Http\Response;
@@ -73,6 +77,66 @@ final class CalendarPageTest extends DatabaseTestCase
         Equipment::setActive((int) $retired['id'], false);
 
         self::assertSame(null, $this->config($this->show(['equipment' => $retired['slug']]))['equipmentId']);
+    }
+
+    public function testTheMembersUpcomingBookingsAreListedUnderTheCalendar(): void
+    {
+        $piece = Equipment::primary();
+        $kim = Users::findByNetid('kim');
+        // One booking within a day, one that runs into the next morning.
+        $this->book((int) $kim?->id, '2030-01-07 09:00', '2030-01-07 12:30');
+        $this->book((int) $kim?->id, '2030-01-08 11:00', '2030-01-09 10:00');
+
+        $body = $this->show()->body;
+
+        self::assertStringContainsString('<details class="my-bookings" id="my-bookings" open>', $body);
+        self::assertStringContainsString('09:00-12:30', $body);
+        self::assertStringContainsString('11:00-Wed 9 Jan 10:00', $body, 'a booking into the next day names its end day');
+        self::assertStringContainsString(
+            '<a href="/booking?equipment=' . $piece['slug'] . '">' . $piece['name'] . '</a>',
+            $body,
+            'the equipment links to its calendar'
+        );
+    }
+
+    public function testTheListCanBeRefreshedOnItsOwn(): void
+    {
+        $this->book((int) Users::findByNetid('kim')?->id, '2030-01-07 09:00', '2030-01-07 12:30');
+
+        $response = (new BookingApiController())->mine(new Request('GET', '/api/bookings/mine'));
+
+        self::assertSame(200, $response->status);
+        self::assertStringContainsString('09:00-12:30', $response->body);
+    }
+
+    public function testTheAdministratorHasNoListOfTheirOwn(): void
+    {
+        Auth::logout();
+        Auth::completeAdminLogin(1, 'admin');
+
+        self::assertStringNotContainsString('My upcoming bookings', $this->show()->body);
+    }
+
+    public function testMyAccountNoLongerListsBookings(): void
+    {
+        Auth::resetCache();
+        $body = (new AccountController())->show(new Request('GET', '/account'))->body;
+
+        self::assertStringNotContainsString('My upcoming bookings', $body);
+    }
+
+    /** A confirmed booking in lab time, made by the administrator so no rule applies. */
+    private function book(int $userId, string $start, string $end): void
+    {
+        $zone = new \DateTimeZone('Europe/Amsterdam');
+        BookingService::create(
+            Actor::forAdmin(),
+            (int) Equipment::primary()['id'],
+            (new \DateTimeImmutable($start, $zone))->setTimezone(new \DateTimeZone('UTC')),
+            (new \DateTimeImmutable($end, $zone))->setTimezone(new \DateTimeZone('UTC')),
+            null,
+            $userId,
+        );
     }
 
     /** @param array<string, string> $query */

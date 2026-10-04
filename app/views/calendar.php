@@ -10,6 +10,7 @@
  * @var \Macrolab\Booking\RuleSet  $rules
  * @var string                     $csrf
  * @var array<string, mixed>       $clientRules
+ * @var list<\Macrolab\Booking\Booking> $mine  the member's upcoming bookings
  */
 
 use Macrolab\Booking\BookingRules;
@@ -74,6 +75,19 @@ use Macrolab\Clock;
          data-csrf="<?= e($csrf) ?>"
          data-config="<?= e(json_encode($clientRules, JSON_THROW_ON_ERROR)) ?>"></div>
 </section>
+
+<?php /* The administrator holds no bookings of their own, so has no list. */ ?>
+<?php if ($actor->userId() !== null): ?>
+    <section class="card">
+        <?php /* Open or closed is remembered per browser by app.js. */ ?>
+        <details class="my-bookings" id="my-bookings" open>
+            <summary><h2>My upcoming bookings</h2></summary>
+            <div id="my-bookings-list" data-url="<?= e(path('/api/bookings/mine')) ?>">
+                <?= \Macrolab\View::render('my_bookings', ['bookings' => $mine]) ?>
+            </div>
+        </details>
+    </section>
+<?php endif; ?>
 
 <script src="<?= e(path('/assets/vendor/fullcalendar-6.1.15.global.min.js')) ?>"></script>
 

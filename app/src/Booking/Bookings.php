@@ -16,7 +16,7 @@ final class Bookings
     private const SELECT = 'SELECT b.id, b.equipment_id, b.user_id, b.starts_at, b.ends_at,
                                    b.purpose, b.status, b.created_by_admin,
                                    u.netid AS owner_netid, u.display_name AS owner_name,
-                                   e.name AS equipment_name
+                                   e.name AS equipment_name, e.slug AS equipment_slug
                               FROM bookings b
                               JOIN users u ON u.id = b.user_id
                               JOIN equipment e ON e.id = b.equipment_id';

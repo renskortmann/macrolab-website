@@ -1,13 +1,11 @@
 <?php
 /**
- * @var \Macrolab\User                  $user
- * @var list<\Macrolab\Booking\Booking> $bookings
- * @var bool                            $canChange
- * @var int                             $minimum
- * @var string|null                     $error
+ * @var \Macrolab\User $user
+ * @var bool           $canChange
+ * @var int            $minimum
+ * @var string|null    $error
  */
 
-use Macrolab\Clock;
 use Macrolab\Csrf;
 ?>
 <section class="card">
@@ -18,33 +16,6 @@ use Macrolab\Csrf;
         <dt>Name</dt><dd><?= e($user->displayName ?? '-') ?></dd>
         <dt>Email</dt><dd><?= e($user->email ?? '-') ?></dd>
     </dl>
-</section>
-
-<section class="card">
-    <h2>My upcoming bookings</h2>
-
-    <?php if ($bookings === []): ?>
-        <p class="muted">You have no upcoming bookings.</p>
-    <?php else: ?>
-        <table>
-            <thead>
-            <tr><th>Date</th><th>Time</th><th>Equipment</th><th>Purpose</th></tr>
-            </thead>
-            <tbody>
-            <?php foreach ($bookings as $booking): ?>
-                <tr>
-                    <td><?= e(Clock::local($booking->startsAt, 'D j M Y')) ?></td>
-                    <td>
-                        <?= e(Clock::local($booking->startsAt, 'H:i')) ?>-<?= e(Clock::local($booking->endsAt, 'H:i')) ?>
-                    </td>
-                    <td><?= e($booking->equipmentName ?? '-') ?></td>
-                    <td><?= e($booking->purpose ?? '-') ?></td>
-                </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
-        <p class="muted small">Changes and cancellations are made on the <a href="<?= e(path('/booking')) ?>">calendar</a>.</p>
-    <?php endif; ?>
 </section>
 
 <?php if ($canChange): ?>

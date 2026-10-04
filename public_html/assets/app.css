@@ -158,6 +158,37 @@ button.link {
 button.danger, button.link.danger { color: var(--danger); }
 
 form.inline { display: inline; }
+/* A filter form: each field a box with its label above it, in a grid that
+   fills the width and stacks on a narrow screen; the button on its own line.
+   Used by the time overview. */
+.filter-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 0.9rem 1.5rem;
+    align-items: end;
+}
+.filter-field label { margin: 0 0 0.3rem; }
+.filter-field select { width: 100%; max-width: none; }
+.filter-actions { margin-top: 1.1rem; }
+.filter-actions button.primary { margin-top: 0; }
+
+/* What a filter found, set off from the form above it. */
+.overview-results { margin-top: 1.5rem; padding-top: 1.1rem; border-top: 1px solid var(--line); }
+.overview-results h3 { font-size: 1.05rem; margin: 1.25rem 0 0.5rem; }
+.overview-results h3:first-child { margin-top: 0; }
+
+/* A table that shows a few rows at a time and scrolls the rest, with its
+   header kept in view. app.js sizes it to exactly data-visible-rows rows;
+   the max-height here is the fallback without it. */
+.table-scroll {
+    max-height: 17rem;
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+.table-scroll table { margin: 0; }
+.table-scroll thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+
 form.row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; }
 form.row label { margin: 0 0 0.2rem; }
 form.row > * { flex: 0 1 auto; }
@@ -215,6 +246,11 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 
 /* A date input beside the 24h time dropdown that goes with it. */
 .when { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+/* "My upcoming bookings" under the calendar: the heading opens and closes it. */
+.my-bookings > summary { cursor: pointer; }
+.my-bookings > summary h2 { display: inline; margin: 0; }
+.my-bookings[open] > summary { margin-bottom: 0.75rem; }
+
 /* Day-first date fields (date_field() in helpers.php): the text field, a
    calendar button, and the browser's date input kept out of sight but
    rendered, because showPicker() refuses a hidden input. */
@@ -330,6 +366,44 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .day-pick { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; }
 
 .day-label { min-width: 15rem; font-size: 1.05rem; font-weight: 600; text-align: center; }
+
+/* The month under "My time registrations": not a button, but boxed like the
+   day label above it, between the same arrow buttons. */
+.month-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: 0 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+/* A card that folds: the heading row is the toggle, with an open arrowhead in
+   the upper right that points down while folded and up while open. */
+.foldable > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    cursor: pointer;
+    list-style: none;
+}
+.foldable > summary::-webkit-details-marker { display: none; }
+.foldable > summary h1,
+.foldable > summary h2 { margin: 0; }
+.foldable > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.foldable[open] > summary { margin-bottom: 0.5rem; }
+.fold-arrow {
+    width: 0.7rem;
+    height: 0.7rem;
+    margin-right: 0.3rem;
+    border-right: 2px solid var(--ink-muted);
+    border-bottom: 2px solid var(--ink-muted);
+    transform: translateY(-25%) rotate(45deg);
+}
+.foldable[open] > summary .fold-arrow { transform: translateY(25%) rotate(-135deg); }
 
 
 /*

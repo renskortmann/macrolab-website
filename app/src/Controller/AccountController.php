@@ -6,7 +6,6 @@ namespace Macrolab\Controller;
 
 use Macrolab\Audit;
 use Macrolab\Auth;
-use Macrolab\Booking\Bookings;
 use Macrolab\Config;
 use Macrolab\Csrf;
 use Macrolab\Http\Request;
@@ -18,8 +17,9 @@ use Macrolab\Users;
 use Macrolab\View;
 
 /**
- * The signed-in user's own account: their upcoming bookings and, while local
- * accounts are in use, their password.
+ * The signed-in user's own account: their details and, while local accounts
+ * are in use, their password. Their upcoming bookings are listed under the
+ * calendar on /booking.
  */
 final class AccountController
 {
@@ -62,7 +62,6 @@ final class AccountController
         return View::page('account', [
             'title'     => 'My account',
             'user'      => $user,
-            'bookings'  => Bookings::forUser($user->id),
             'canChange' => Settings::localLoginEnabled() && $user->hasPassword(),
             'minimum'   => Config::int('auth.password_min_length', 12),
             'error'     => $error,

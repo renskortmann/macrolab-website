@@ -1,14 +1,19 @@
 <?php
 /**
- * One month of an employee's entries, as a list. Rendered inside the time
- * registration page and on its own by /api/time/month, which the day sheet
- * calls after each save so this list never disagrees with the grid above it.
+ * "My time registrations": one month of the employee's own entries, oldest
+ * first. Rendered inside the time registration page and on its own by
+ * /api/time/month, which the page calls after each save on the day sheet and
+ * when a month arrow is clicked (app.js keeps the section open or folded
+ * across both). It starts folded.
  *
  * @var list<\Macrolab\Time\TimeEntry>             $entries
  * @var \DateTimeImmutable                         $month
+ * @var bool                                       $open       start unfolded
  * @var string                                     $day        Y-m-d on the sheet above
- * @var string                                     $prevMonth
- * @var string                                     $nextMonth
+ * @var string                                     $prevMonth  Y-m
+ * @var string                                     $nextMonth  Y-m
+ * @var string                                     $prevLabel  "September 2026"
+ * @var string                                     $nextLabel
  * @var int                                        $totalMinutes
  * @var list<array{project: string, minutes: int}> $byProject
  */
@@ -16,13 +21,23 @@
 use Macrolab\Csrf;
 use Macrolab\Time\TimeRules;
 ?>
-<section class="card" id="time-month">
-    <h2><?= e($month->format('F Y')) ?></h2>
+<section class="card" id="time-month"
+         data-url="<?= e(path('/api/time/month')) ?>" data-day="<?= e($day) ?>">
+<details class="foldable"<?= $open ? ' open' : '' ?>>
+    <summary>
+        <h2>My time registrations</h2>
+        <span class="fold-arrow" aria-hidden="true"></span>
+    </summary>
 
-    <p class="pager">
-        <a href="<?= e(path('/time?day=' . $day . '&month=' . $prevMonth)) ?>">&larr; <?= e($prevMonth) ?></a>
-        <a href="<?= e(path('/time?day=' . $day . '&month=' . $nextMonth)) ?>"><?= e($nextMonth) ?> &rarr;</a>
-    </p>
+    <nav class="day-nav month-nav" aria-label="Month">
+        <a class="day-step" data-month="<?= e($prevMonth) ?>"
+           href="<?= e(path('/time?day=' . $day . '&month=' . $prevMonth)) ?>"
+           aria-label="Previous month: <?= e($prevLabel) ?>" title="<?= e($prevLabel) ?>">&larr;</a>
+        <span class="day-label month-label"><?= e($month->format('F Y')) ?></span>
+        <a class="day-step" data-month="<?= e($nextMonth) ?>"
+           href="<?= e(path('/time?day=' . $day . '&month=' . $nextMonth)) ?>"
+           aria-label="Next month: <?= e($nextLabel) ?>" title="<?= e($nextLabel) ?>">&rarr;</a>
+    </nav>
 
     <?php if ($entries === []): ?>
         <p class="muted">Nothing logged this month.</p>
@@ -66,4 +81,5 @@ use Macrolab\Time\TimeRules;
             <?php endforeach; ?>
         </dl>
     <?php endif; ?>
+</details>
 </section>

@@ -15,7 +15,10 @@
         wireInviteLink();
         wireDayPicker();
         wireDaySheet();
+        wireMonthList();
+        wireScrollTables();
         initCalendar();
+        wireMyBookings();
     });
 
     /*
@@ -412,6 +415,7 @@
                 .then(function () {
                     close();
                     calendar.refetchEvents();
+                    refreshMyBookings();
                 })
                 .catch(function (err) { showError(err.message); })
                 .finally(function () { saveBtn.disabled = false; });
@@ -427,6 +431,7 @@
                 .then(function () {
                     close();
                     calendar.refetchEvents();
+                    refreshMyBookings();
                 })
                 .catch(function (err) { showError(err.message); })
                 .finally(function () { deleteBtn.disabled = false; });
@@ -440,6 +445,7 @@
                 purpose: info.event.extendedProps.purpose || ''
             }).then(function () {
                 calendar.refetchEvents();
+                refreshMyBookings();
             }).catch(function (err) {
                 info.revert();
                 alert(err.message);
@@ -477,6 +483,51 @@
     }
 
     /*
+     * "My upcoming bookings" under the calendar folds open and shut; this
+     * browser remembers which, for the next visit. Only a convenience, so a
+     * browser that refuses storage simply starts open each time.
+     */
+    function wireMyBookings() {
+        var details = document.getElementById('my-bookings');
+        if (!details) {
+            return;
+        }
+
+        var key = 'macrolab.myBookingsOpen';
+        try {
+            if (window.localStorage.getItem(key) === 'no') {
+                details.open = false;
+            }
+        } catch (err) { /* storage unavailable: keep the default */ }
+
+        details.addEventListener('toggle', function () {
+            try {
+                window.localStorage.setItem(key, details.open ? 'yes' : 'no');
+            } catch (err) { /* nothing to remember it in */ }
+        });
+    }
+
+    /* Re-render the list after the calendar has changed a booking. */
+    function refreshMyBookings() {
+        var list = document.getElementById('my-bookings-list');
+        if (!list) {
+            return;
+        }
+
+        fetch(list.dataset.url, { credentials: 'same-origin' })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('The list could not be refreshed.');
+                }
+                return response.text();
+            })
+            .then(function (html) { list.innerHTML = html; })
+            .catch(function () {
+                /* The change itself was saved; the list is right on reload. */
+            });
+    }
+
+    /*
      * The time registration day sheet. Each row is one project on one day and
      * saves itself when one of its cells is left after a change. The server
      * decides everything - rules, daily cap, ownership - and this only reports
@@ -492,7 +543,6 @@
         var day = table.dataset.day;
         var csrf = table.dataset.csrf;
         var cellUrl = table.dataset.cellUrl;
-        var monthUrl = table.dataset.monthUrl;
 
         table.querySelectorAll('tbody tr[data-project-id]').forEach(function (row) {
             var hours = row.querySelector('.day-hours');
@@ -592,37 +642,105 @@
 
         /* Redraw the month list below so it agrees with what was saved. */
         function refreshMonth() {
-            var section = document.getElementById('time-month');
-            if (!section) {
+            loadMonth(new URLSearchParams(window.location.search).get('month'));
+        }
+    }
+
+    /*
+     * Tables that show a few rows at a time (.table-scroll[data-visible-rows]):
+     * size the box to exactly that many rows, header included. Rows differ in
+     * height - a long note wraps - so they are measured, again whenever the
+     * box comes into view (its section unfolds) or the window is resized.
+     */
+    function wireScrollTables() {
+        document.querySelectorAll('.table-scroll[data-visible-rows]').forEach(function (box) {
+            var fit = function () {
+                if (box.offsetParent === null) {
+                    return; /* folded away: nothing to measure yet */
+                }
+
+                var rows = box.querySelectorAll('tbody tr');
+                var visible = Number(box.dataset.visibleRows);
+
+                if (rows.length <= visible) {
+                    box.style.maxHeight = 'none';
+                    return;
+                }
+
+                var head = box.querySelector('thead');
+                var height = head ? head.offsetHeight : 0;
+                for (var i = 0; i < visible; i++) {
+                    height += rows[i].offsetHeight;
+                }
+                /* The box's own top and bottom border. */
+                box.style.maxHeight = (height + 2) + 'px';
+            };
+
+            var details = box.closest('details');
+            if (details) {
+                details.addEventListener('toggle', fit);
+            }
+            window.addEventListener('resize', fit);
+            fit();
+        });
+    }
+
+    /*
+     * "My time registrations" under the day sheet. Its month arrows are plain
+     * links (they work without this script); with it, the other month is
+     * fetched in place, so the section stays unfolded, and the address keeps
+     * the month so a later save redraws the same one.
+     */
+    function wireMonthList() {
+        document.addEventListener('click', function (event) {
+            var arrow = event.target.closest('#time-month .month-nav a[data-month]');
+            if (!arrow || event.ctrlKey || event.metaKey || event.shiftKey) {
                 return;
             }
 
-            var month = new URLSearchParams(window.location.search).get('month');
-            var url = monthUrl + '?day=' + encodeURIComponent(day) +
-                (month ? '&month=' + encodeURIComponent(month) : '');
+            event.preventDefault();
+            loadMonth(arrow.dataset.month);
+            window.history.replaceState(null, '', arrow.href);
+        });
+    }
 
-            fetch(url, { credentials: 'same-origin' })
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error('The month list could not be refreshed.');
-                    }
-                    return response.text();
-                })
-                .then(function (html) {
-                    var template = document.createElement('template');
-                    template.innerHTML = html;
-                    var fresh = template.content.getElementById('time-month');
-
-                    if (fresh) {
-                        wireConfirmations(fresh);
-                        document.getElementById('time-month').replaceWith(fresh);
-                    }
-                })
-                .catch(function () {
-                    /* Not worth interrupting anyone for: the save itself
-                       succeeded, and the list is right on the next load. */
-                });
+    /*
+     * Fetch one month of the list (null: the month of the day on the sheet)
+     * and swap it in, keeping the section open or folded as it was.
+     */
+    function loadMonth(month) {
+        var section = document.getElementById('time-month');
+        if (!section) {
+            return;
         }
+
+        var url = section.dataset.url + '?day=' + encodeURIComponent(section.dataset.day) +
+            (month ? '&month=' + encodeURIComponent(month) : '');
+
+        fetch(url, { credentials: 'same-origin' })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('The month list could not be loaded.');
+                }
+                return response.text();
+            })
+            .then(function (html) {
+                var template = document.createElement('template');
+                template.innerHTML = html;
+                var fresh = template.content.getElementById('time-month');
+                var current = document.getElementById('time-month');
+
+                if (fresh && current) {
+                    var wasOpen = current.querySelector('details').open;
+                    fresh.querySelector('details').open = wasOpen;
+                    wireConfirmations(fresh);
+                    current.replaceWith(fresh);
+                }
+            })
+            .catch(function () {
+                /* Not worth interrupting anyone for: the list is right on
+                   the next page load. */
+            });
     }
 
     /* ---------------------------------------------------------- helpers */

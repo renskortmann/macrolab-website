@@ -571,6 +571,11 @@ member to choose the equipment first. Nothing is remembered between visits, so
 nobody books the wrong equipment by accident. `/booking?equipment=<slug>`
 links straight to one piece.
 
+Under the calendar, members see **My upcoming bookings** for all equipment,
+each with a link to that equipment's calendar. The list folds open and shut
+(the browser remembers which) and refreshes itself after a booking is made,
+moved or cancelled.
+
 A piece of equipment with bookings on record cannot be deleted, only retired -
 the same reasoning as suspending a user rather than deleting them, so the
 record of who used what stays intact. Retiring one hides it from the picker
@@ -602,6 +607,11 @@ which is deliberate: hours are booked to work, not to equipment. Time spent
 maintaining a piece of equipment is logged against a maintenance activity, not
 against that equipment's calendar.
 
+Below the day sheet, **My time registrations** lists one month of the
+technician's own entries, oldest first, with arrows to the previous and next
+month and a total per activity. It starts folded; the arrowhead in its upper
+right corner opens it.
+
 Employees own their entries and can change or remove their own at any time -
 and only their own. A request naming somebody else's entry is refused with 403
 and recorded, the same discipline the bookings use.
@@ -612,7 +622,10 @@ at `/time/overview`. It filters by person, activity and date range, with a CSV
 export of exactly those rows (columns `date`, `netid`, `name`, `activity`,
 `activity_code`, `hours`, `minutes`, `note`, `entry_id`), separated by commas
 or by semicolons. That view is **read-only**: there is no approval step, and
-nobody edits somebody else's timesheet.
+nobody edits somebody else's timesheet. The page lists the entries first
+(folded until opened, oldest first, five rows at a time with a scrollbar),
+then the hours per activity (folded), then **Export to CSV** with the filter,
+the totals and the download links; after **Show**, the entries open.
 
 An activity with time on record cannot be deleted, only retired - the same
 reasoning as retiring a piece of equipment. For the same reason, an account with time

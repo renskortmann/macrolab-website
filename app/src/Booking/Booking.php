@@ -26,6 +26,7 @@ final class Booking
         public readonly ?string $ownerNetid = null,
         public readonly ?string $ownerName = null,
         public readonly ?string $equipmentName = null,
+        public readonly ?string $equipmentSlug = null,
     ) {
     }
 
@@ -49,6 +50,8 @@ final class Booking
                 ? (string) $row['owner_name'] : null,
             equipmentName: isset($row['equipment_name']) && $row['equipment_name'] !== null
                 ? (string) $row['equipment_name'] : null,
+            equipmentSlug: isset($row['equipment_slug']) && $row['equipment_slug'] !== null
+                ? (string) $row['equipment_slug'] : null,
         );
     }
 

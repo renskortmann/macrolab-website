@@ -71,14 +71,14 @@ final class Navigation
             $destinations[] = [
                 'href'  => '/time/overview',
                 'label' => 'Time overview',
-                'blurb' => 'What everyone has logged, with filters and a CSV export.',
+                'blurb' => 'What everyone has logged, with filters and a CSV export. This function is only available to the lab manager and to the system administrator.',
             ];
         }
 
         $destinations[] = [
             'href'  => '/account',
             'label' => 'My account',
-            'blurb' => 'Your upcoming bookings, and your password.',
+            'blurb' => 'Your details, and your password.',
         ];
 
         return $destinations;

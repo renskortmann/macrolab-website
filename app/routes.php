@@ -30,6 +30,8 @@ $router->get('/booking', [CalendarController::class, 'show']);
 // The JSON API the calendar talks to. Every write verifies the CSRF token and
 // re-checks ownership against the stored booking.
 $router->get('/api/bookings', [BookingApiController::class, 'feed']);
+// The member's upcoming bookings as HTML, for the list under the calendar.
+$router->get('/api/bookings/mine', [BookingApiController::class, 'mine']);
 $router->post('/api/bookings', [BookingApiController::class, 'create']);
 $router->post('/api/bookings/{id}', [BookingApiController::class, 'update']);
 $router->post('/api/bookings/{id}/cancel', [BookingApiController::class, 'cancel']);
