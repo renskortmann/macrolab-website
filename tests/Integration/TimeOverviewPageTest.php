@@ -17,8 +17,9 @@ use Macrolab\Time\TimeEntryService;
 use Macrolab\Users;
 
 /**
- * The time overview page: the entries first (folded, oldest first, five rows
- * in view), then the hours per activity (folded), then the filter and export.
+ * The time overview page: the filter on one line, then the entries with the
+ * hours per activity (folded, oldest first, five rows in view), then the
+ * totals and the CSV export.
  */
 final class TimeOverviewPageTest extends DatabaseTestCase
 {
@@ -48,17 +49,26 @@ final class TimeOverviewPageTest extends DatabaseTestCase
     public function testTheSectionsComeInTheirNewOrder(): void
     {
         self::assertMatchesRegularExpression(
-            '#<h1>Time registrations overview</h1>.*<h2>By activity</h2>.*<h2>Export to CSV</h2>#s',
+            '#<h1>Time overview</h1>.*<form[^>]*class="filter filter-line">.*</form>'
+            . '.*<h2>Time registrations overview</h2>.*<h3>By activity</h3>.*</details>.*<h2>Export to CSV</h2>#s',
             $this->page()
         );
     }
 
-    public function testBothUpperSectionsStartFolded(): void
+    public function testTheEntriesAndHoursPerActivityAreOneFoldedSection(): void
     {
         $body = $this->page();
 
-        self::assertSame(2, substr_count($body, '<details class="foldable">'), 'entries and by activity, both folded');
+        self::assertSame(1, substr_count($body, '<details class="foldable">'), 'one foldable section, folded');
         self::assertStringNotContainsString('<details class="foldable" open>', $body);
+    }
+
+    public function testTheShowButtonSitsOnTheFilterLine(): void
+    {
+        self::assertMatchesRegularExpression(
+            '#<div class="filter-fields">.*<label for="project">.*<div class="filter-actions">\s*<button type="submit" class="primary">Show</button>\s*</div>\s*</div>\s*</form>#s',
+            $this->page()
+        );
     }
 
     public function testUsingTheFilterOpensTheEntries(): void
@@ -66,7 +76,7 @@ final class TimeOverviewPageTest extends DatabaseTestCase
         $body = $this->page(['from' => '01-09-2026', 'to' => '30-09-2026']);
 
         self::assertMatchesRegularExpression(
-            '#<details class="foldable" open>\s*<summary>\s*<h1>Time registrations overview</h1>#',
+            '#<details class="foldable" open>\s*<summary>\s*<h2>Time registrations overview</h2>#',
             $body
         );
     }

@@ -622,10 +622,11 @@ at `/time/overview`. It filters by person, activity and date range, with a CSV
 export of exactly those rows (columns `date`, `netid`, `name`, `activity`,
 `activity_code`, `hours`, `minutes`, `note`, `entry_id`), separated by commas
 or by semicolons. That view is **read-only**: there is no approval step, and
-nobody edits somebody else's timesheet. The page lists the entries first
-(folded until opened, oldest first, five rows at a time with a scrollbar),
-then the hours per activity (folded), then **Export to CSV** with the filter,
-the totals and the download links; after **Show**, the entries open.
+nobody edits somebody else's timesheet. The page has the filter on one line
+at the top, then **Time registrations overview** - the entries, oldest first,
+five rows at a time with an always-visible scrollbar, and the hours per
+activity - folded until opened (it opens after **Show**), then **Export to
+CSV** with the totals and the download links.
 
 An activity with time on record cannot be deleted, only retired - the same
 reasoning as retiring a piece of equipment. For the same reason, an account with time

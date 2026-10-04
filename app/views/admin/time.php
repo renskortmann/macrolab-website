@@ -3,9 +3,9 @@
  * The read-only view of what everyone has logged, for the administrator (at
  * /admin/time) and for lab managers (at /time/overview).
  *
- * Top to bottom: the entries (folded until opened, or open right after the
- * filter at the bottom was used), the hours per activity (folded), and the
- * filter with its totals and the CSV export.
+ * Top to bottom: the filter on one line; the entries with the hours per
+ * activity, folded until opened (and open right after the filter was used);
+ * the totals and the CSV export.
  *
  * Read-only on purpose: there is no approval step, and nobody edits somebody
  * else's timesheet. See Macrolab\Time\TimeEntryPolicy.
@@ -23,63 +23,9 @@
 use Macrolab\Time\TimeRules;
 ?>
 <section class="card">
-<details class="foldable"<?= $filtered ? ' open' : '' ?>>
-    <summary>
-        <h1>Time registrations overview</h1>
-        <span class="fold-arrow" aria-hidden="true"></span>
-    </summary>
+    <h1>Time overview</h1>
 
-    <?php if ($entries === []): ?>
-        <p class="muted">Nothing logged in that range.</p>
-    <?php else: ?>
-        <?php /* Five rows at a time; app.js sizes the box to exactly five. */ ?>
-        <div class="table-scroll" data-visible-rows="5">
-            <table>
-                <thead>
-                <tr><th>Day</th><th>Who</th><th>Activity</th><th class="num">Hours</th><th>Note</th></tr>
-                </thead>
-                <tbody>
-                <?php foreach ($entries as $entry): ?>
-                    <tr>
-                        <td><?= e($entry->workedOnLabel('j M Y')) ?></td>
-                        <td>
-                            <?= e($entry->ownerLabel()) ?>
-                            <span class="muted">(<?= e($entry->ownerNetid) ?>)</span>
-                        </td>
-                        <td><?= e($entry->projectLabel()) ?></td>
-                        <td class="num"><?= e($entry->hoursLabel()) ?></td>
-                        <td><?= $entry->note === null ? '<span class="muted">-</span>' : e($entry->note) ?></td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <p class="muted small"><?= e(count($entries)) ?> entries, oldest first.</p>
-    <?php endif; ?>
-</details>
-</section>
-
-<?php if ($byProject !== []): ?>
-    <section class="card">
-    <details class="foldable">
-        <summary>
-            <h2>By activity</h2>
-            <span class="fold-arrow" aria-hidden="true"></span>
-        </summary>
-        <dl class="facts">
-            <?php foreach ($byProject as $row): ?>
-                <dt><?= e($row['project']) ?></dt>
-                <dd><?= e(TimeRules::formatHours($row['minutes'])) ?></dd>
-            <?php endforeach; ?>
-        </dl>
-    </details>
-    </section>
-<?php endif; ?>
-
-<section class="card">
-    <h2>Export to CSV</h2>
-
-    <form method="get" action="<?= e(path($basePath)) ?>" class="filter">
+    <form method="get" action="<?= e(path($basePath)) ?>" class="filter filter-line">
         <div class="filter-fields">
             <div class="filter-field">
                 <label for="from">From</label>
@@ -116,14 +62,67 @@ use Macrolab\Time\TimeRules;
                     <?php endforeach; ?>
                 </select>
             </div>
-        </div>
 
-        <div class="filter-actions">
-            <button type="submit" class="primary">Show</button>
+            <div class="filter-actions">
+                <button type="submit" class="primary">Show</button>
+            </div>
         </div>
     </form>
+</section>
 
-    <div class="overview-results">
+<section class="card">
+<details class="foldable"<?= $filtered ? ' open' : '' ?>>
+    <summary>
+        <h2>Time registrations overview</h2>
+        <span class="fold-arrow" aria-hidden="true"></span>
+    </summary>
+
+    <?php if ($entries === []): ?>
+        <p class="muted">Nothing logged in that range.</p>
+    <?php else: ?>
+        <?php /* Five rows at a time; app.js sizes the box to exactly five. */ ?>
+        <div class="table-scroll" data-visible-rows="5">
+            <table>
+                <thead>
+                <tr><th>Day</th><th>Who</th><th>Activity</th><th class="num">Hours</th><th>Note</th></tr>
+                </thead>
+                <tbody>
+                <?php foreach ($entries as $entry): ?>
+                    <tr>
+                        <td class="nowrap"><?= e($entry->workedOnLabel('j M Y')) ?></td>
+                        <td>
+                            <?= e($entry->ownerLabel()) ?>
+                            <span class="muted">(<?= e($entry->ownerNetid) ?>)</span>
+                        </td>
+                        <td><?= e($entry->projectLabel()) ?></td>
+                        <td class="num"><?= e($entry->hoursLabel()) ?></td>
+                        <td><?= $entry->note === null ? '<span class="muted">-</span>' : e($entry->note) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <p class="muted small">
+            <?= e(count($entries)) ?> entries, oldest first<?= count($entries) > 5 ? ' - scroll the list to see them all' : '' ?>.
+        </p>
+    <?php endif; ?>
+
+    <?php if ($byProject !== []): ?>
+        <h3>By activity</h3>
+        <dl class="facts">
+            <?php foreach ($byProject as $row): ?>
+                <dt><?= e($row['project']) ?></dt>
+                <dd><?= e(TimeRules::formatHours($row['minutes'])) ?></dd>
+            <?php endforeach; ?>
+        </dl>
+    <?php endif; ?>
+</details>
+</section>
+
+<section class="card">
+    <h2>Export to CSV</h2>
+
+    <div class="overview-results overview-export">
         <h3>Totals</h3>
         <dl class="facts">
             <dt>Entries</dt><dd><?= e($totals['entries']) ?></dd>
