@@ -169,6 +169,12 @@ app's own 404 (so `.htaccess` routing works); `/assets/app.css` 200;
 the secure session cookie are sent. Plesk's site Preview shows the server's
 default page, not this site, so it is no use for testing.
 
+The first member sign-in (2026-10-04) landed on Plesk's "Domain Default
+page": Plesk had put an `index.html` into the new `public_html/`, and Apache
+served it for `/` (the hub) because `/` is a real directory and so is not
+rewritten. Admin sign-in goes to `/admin`, so it went unnoticed. Fixed by
+deleting that file and by `DirectoryIndex index.php` in `.htaccess`.
+
 The first install attempt exposed a bug, since fixed: the installer's rate
 limit queried `login_attempts` before the installer had created it, so
 `/install` failed with a 500 on an empty database (`InstallerTest` covers it).
@@ -228,12 +234,11 @@ To do:
 5. ~~Idle limit~~ - verified on the live site 2026-10-03 after the fix: after
    25 idle minutes the admin was asked to sign in again. (The Plesk panel has
    its own, unrelated idle timeout, 30 minutes by default.)
-6. `httpdocs/` (Plesk's original document root: default `index.html`,
-   `cgi-bin/`, and a `.well-known/` from the failed 2026-10-01 certificate
-   attempt) was renamed to `httpdocs.unused` on 2026-10-03. Delete it after
-   the first automatic certificate renewal (around early December 2026) has
-   succeeded - in case renewal still looks for `.well-known/` there. If
-   renewal fails, rename it back to `httpdocs` and renew.
+6. `httpdocs/` (Plesk's original document root) was renamed to
+   `httpdocs.unused` on 2026-10-03 and can now be deleted: Let's Encrypt put
+   its `.well-known/` into `public_html/` when it issued the certificate
+   (2026-10-02), so renewal uses the current document root. Keep
+   `public_html/.well-known/` and Plesk's `public_html/cgi-bin/`.
 7. Next time: backups (ask ICT about server-level backups first; see item 3)
    and the first real users (allowlist, set-up links, activities; then a
    real sign-in at `/login`, a booking and a time entry, to confirm the

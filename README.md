@@ -210,6 +210,12 @@ Then *Pull updates* and *Deploy now*. The subscription root ends up like this:
 to configure. Plesk's original `httpdocs/` folder is no longer used and can be
 deleted once the site works.
 
+When the document root is changed, Plesk puts its "Domain Default page"
+(`index.html`) into the new `public_html/`, and a deployment leaves that
+untracked file alone. Delete it in File Manager. `.htaccess` names
+`index.php` as the only index file, so the app is served at `/` either way,
+but the file has no business there.
+
 ### 3. Build `vendor/` with Plesk PHP Composer
 
 **PHP Composer** on the domain dashboard. It finds `composer.json` in the

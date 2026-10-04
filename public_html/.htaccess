@@ -8,6 +8,12 @@
 
 Options -Indexes -MultiViews
 
+# "/" is a real directory, so the rewrite rules below leave it alone and
+# Apache picks its index file. Name ours only: Plesk drops a default index.html
+# into a new document root, and Apache would otherwise serve that instead of
+# the hub.
+DirectoryIndex index.php
+
 # ---------------------------------------------------------------- routing ----
 <IfModule mod_rewrite.c>
     RewriteEngine On
