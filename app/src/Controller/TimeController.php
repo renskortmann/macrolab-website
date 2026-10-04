@@ -63,10 +63,7 @@ final class TimeController
             'isOpen'     => TimeRules::isOpenForLogging($rules, $day, $today),
             'rows'       => $rows,
             'rules'      => $rules,
-            // The month list starts folded, unless the visitor came here by
-            // stepping through months (without the script, that reloads the page).
-            'month'      => self::monthData($user->id, self::month($request, $day), $day,
-                $request->query('month') !== null),
+            'month'      => self::monthData($user->id, self::month($request, $day), $day),
         ]);
     }
 
@@ -81,7 +78,6 @@ final class TimeController
         int $userId,
         DateTimeImmutable $month,
         DateTimeImmutable $day,
-        bool $open = false,
     ): array {
         $entries = TimeEntries::forUser($userId, $month, $month->modify('last day of this month'));
         $prev = $month->modify('-1 month');
@@ -90,7 +86,6 @@ final class TimeController
         return [
             'entries'      => $entries,
             'month'        => $month,
-            'open'         => $open,
             'day'          => $day->format('Y-m-d'),
             'prevMonth'    => $prev->format('Y-m'),
             'nextMonth'    => $next->format('Y-m'),

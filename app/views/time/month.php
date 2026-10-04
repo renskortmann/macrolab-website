@@ -3,12 +3,11 @@
  * "My time registrations": one month of the employee's own entries, oldest
  * first. Rendered inside the time registration page and on its own by
  * /api/time/month, which the page calls after each save on the day sheet and
- * when a month arrow is clicked (app.js keeps the section open or folded
- * across both). It starts folded.
+ * when a month arrow is clicked (app.js keeps the card open or folded across
+ * both).
  *
  * @var list<\Macrolab\Time\TimeEntry>             $entries
  * @var \DateTimeImmutable                         $month
- * @var bool                                       $open       start unfolded
  * @var string                                     $day        Y-m-d on the sheet above
  * @var string                                     $prevMonth  Y-m
  * @var string                                     $nextMonth  Y-m
@@ -23,11 +22,7 @@ use Macrolab\Time\TimeRules;
 ?>
 <section class="card" id="time-month"
          data-url="<?= e(path('/api/time/month')) ?>" data-day="<?= e($day) ?>">
-<details class="foldable"<?= $open ? ' open' : '' ?>>
-    <summary>
-        <h2>My time registrations</h2>
-        <span class="fold-arrow" aria-hidden="true"></span>
-    </summary>
+    <h2>My time registrations</h2>
 
     <nav class="day-nav month-nav" aria-label="Month">
         <a class="day-step" data-month="<?= e($prevMonth) ?>"
@@ -81,5 +76,4 @@ use Macrolab\Time\TimeRules;
             <?php endforeach; ?>
         </dl>
     <?php endif; ?>
-</details>
 </section>

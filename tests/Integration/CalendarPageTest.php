@@ -89,7 +89,7 @@ final class CalendarPageTest extends DatabaseTestCase
 
         $body = $this->show()->body;
 
-        self::assertStringContainsString('<details class="my-bookings" id="my-bookings" open>', $body);
+        self::assertMatchesRegularExpression('#<section class="card" id="my-bookings">\s*<h2>My upcoming bookings</h2>#', $body);
         self::assertStringContainsString('09:00-12:30', $body);
         self::assertStringContainsString('11:00-Wed 9 Jan 10:00', $body, 'a booking into the next day names its end day');
         self::assertStringContainsString(

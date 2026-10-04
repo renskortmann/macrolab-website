@@ -9,6 +9,8 @@
     'use strict';
 
     document.addEventListener('DOMContentLoaded', function () {
+        /* First, so everything wired below sits in its final place. */
+        wireFoldableCards(document);
         wireConfirmations(document);
         wireAutoSubmit();
         wireDateFields();
@@ -18,8 +20,65 @@
         wireMonthList();
         wireScrollTables();
         initCalendar();
-        wireMyBookings();
     });
+
+    /*
+     * Every card on every page folds: an open arrowhead at its upper right -
+     * pointing up while open, down while folded - and the card's heading both
+     * fold and unfold it. Cards start open. The heading row (the heading, or
+     * the header that holds it) stays visible; everything below it goes into
+     * a body that folds. Without this script every card is simply open.
+     */
+    var foldCount = 0;
+
+    function wireFoldableCards(root) {
+        var cards = root.matches && root.matches('section.card') ? [root] : root.querySelectorAll('section.card');
+
+        Array.prototype.forEach.call(cards, function (card) {
+            var header = card.firstElementChild;
+            if (card.classList.contains('card-foldable') || !header) {
+                return;
+            }
+
+            var heading = /^H[12]$/.test(header.tagName) ? header : header.querySelector('h1, h2');
+            if (!heading) {
+                return;
+            }
+
+            var body = document.createElement('div');
+            body.className = 'card-body';
+            body.id = (card.id || 'card-' + (++foldCount)) + '-body';
+            while (header.nextSibling) {
+                body.appendChild(header.nextSibling);
+            }
+            card.appendChild(body);
+
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'fold-toggle';
+            button.setAttribute('aria-controls', body.id);
+            button.innerHTML = '<span class="fold-arrow" aria-hidden="true"></span>';
+            card.insertBefore(button, header);
+            card.classList.add('card-foldable');
+            heading.classList.add('fold-heading');
+
+            var title = heading.textContent.trim();
+            card.foldTo = function (folded) {
+                card.classList.toggle('is-folded', folded);
+                button.setAttribute('aria-expanded', folded ? 'false' : 'true');
+                button.setAttribute('aria-label', (folded ? 'Unfold ' : 'Fold ') + title);
+                button.title = folded ? 'Unfold' : 'Fold';
+                card.dispatchEvent(new CustomEvent('card-toggle'));
+            };
+            card.foldTo(false);
+
+            var toggle = function () {
+                card.foldTo(!card.classList.contains('is-folded'));
+            };
+            button.addEventListener('click', toggle);
+            heading.addEventListener('click', toggle);
+        });
+    }
 
     /*
      * Any element with data-confirm asks before submitting. Takes a root so
@@ -482,31 +541,6 @@
         });
     }
 
-    /*
-     * "My upcoming bookings" under the calendar folds open and shut; this
-     * browser remembers which, for the next visit. Only a convenience, so a
-     * browser that refuses storage simply starts open each time.
-     */
-    function wireMyBookings() {
-        var details = document.getElementById('my-bookings');
-        if (!details) {
-            return;
-        }
-
-        var key = 'macrolab.myBookingsOpen';
-        try {
-            if (window.localStorage.getItem(key) === 'no') {
-                details.open = false;
-            }
-        } catch (err) { /* storage unavailable: keep the default */ }
-
-        details.addEventListener('toggle', function () {
-            try {
-                window.localStorage.setItem(key, details.open ? 'yes' : 'no');
-            } catch (err) { /* nothing to remember it in */ }
-        });
-    }
-
     /* Re-render the list after the calendar has changed a booking. */
     function refreshMyBookings() {
         var list = document.getElementById('my-bookings-list');
@@ -650,7 +684,7 @@
      * Tables that show a few rows at a time (.table-scroll[data-visible-rows]):
      * size the box to exactly that many rows, header included. Rows differ in
      * height - a long note wraps - so they are measured, again whenever the
-     * box comes into view (its section unfolds) or the window is resized.
+     * box comes into view (its card unfolds) or the window is resized.
      */
     function wireScrollTables() {
         document.querySelectorAll('.table-scroll[data-visible-rows]').forEach(function (box) {
@@ -676,9 +710,9 @@
                 box.style.maxHeight = (height + 2) + 'px';
             };
 
-            var details = box.closest('details');
-            if (details) {
-                details.addEventListener('toggle', fit);
+            var card = box.closest('section.card');
+            if (card) {
+                card.addEventListener('card-toggle', fit);
             }
             window.addEventListener('resize', fit);
             fit();
@@ -688,7 +722,7 @@
     /*
      * "My time registrations" under the day sheet. Its month arrows are plain
      * links (they work without this script); with it, the other month is
-     * fetched in place, so the section stays unfolded, and the address keeps
+     * fetched in place, so the card stays as it is, and the address keeps
      * the month so a later save redraws the same one.
      */
     function wireMonthList() {
@@ -706,7 +740,7 @@
 
     /*
      * Fetch one month of the list (null: the month of the day on the sheet)
-     * and swap it in, keeping the section open or folded as it was.
+     * and swap it in, keeping the card open or folded as it was.
      */
     function loadMonth(month) {
         var section = document.getElementById('time-month');
@@ -731,10 +765,13 @@
                 var current = document.getElementById('time-month');
 
                 if (fresh && current) {
-                    var wasOpen = current.querySelector('details').open;
-                    fresh.querySelector('details').open = wasOpen;
-                    wireConfirmations(fresh);
+                    var wasFolded = current.classList.contains('is-folded');
                     current.replaceWith(fresh);
+                    wireFoldableCards(fresh);
+                    if (fresh.foldTo) {
+                        fresh.foldTo(wasFolded);
+                    }
+                    wireConfirmations(fresh);
                 }
             })
             .catch(function () {

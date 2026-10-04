@@ -265,11 +265,6 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 
 /* A date input beside the 24h time dropdown that goes with it. */
 .when { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
-/* "My upcoming bookings" under the calendar: the heading opens and closes it. */
-.my-bookings > summary { cursor: pointer; }
-.my-bookings > summary h2 { display: inline; margin: 0; }
-.my-bookings[open] > summary { margin-bottom: 0.75rem; }
-
 /* Day-first date fields (date_field() in helpers.php): the text field, a
    calendar button, and the browser's date input kept out of sight but
    rendered, because showPicker() refuses a hidden input. */
@@ -399,30 +394,42 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
     background: var(--surface);
 }
 
-/* A card that folds: the heading row is the toggle, with an open arrowhead in
-   the upper right that points down while folded and up while open. */
-.foldable > summary {
-    display: flex;
+/* Every card folds (wireFoldableCards() in app.js): an open arrowhead in the
+   upper right corner - up while open, down while folded - and the heading
+   both toggle it. The heading row stays; the body below it folds away. */
+.card-foldable { position: relative; }
+.card-foldable > .fold-toggle + * { padding-right: 2.75rem; }
+.fold-toggle {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
     cursor: pointer;
-    list-style: none;
 }
-.foldable > summary::-webkit-details-marker { display: none; }
-.foldable > summary h1,
-.foldable > summary h2 { margin: 0; }
-.foldable > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-.foldable[open] > summary { margin-bottom: 0.5rem; }
+.fold-toggle:hover .fold-arrow { border-color: var(--ink); }
+.fold-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.fold-heading { cursor: pointer; }
+.card-foldable.is-folded > .card-body { display: none; }
+.card-foldable.is-folded > .fold-toggle + * { margin-bottom: 0; }
+.card-foldable.is-folded > .fold-toggle + * h1,
+.card-foldable.is-folded > .fold-toggle + h1,
+.card-foldable.is-folded > .fold-toggle + h2 { margin-bottom: 0; }
 .fold-arrow {
     width: 0.7rem;
     height: 0.7rem;
-    margin-right: 0.3rem;
     border-right: 2px solid var(--ink-muted);
     border-bottom: 2px solid var(--ink-muted);
-    transform: translateY(-25%) rotate(45deg);
+    transform: translateY(25%) rotate(-135deg);
 }
-.foldable[open] > summary .fold-arrow { transform: translateY(25%) rotate(-135deg); }
+.card-foldable.is-folded .fold-arrow { transform: translateY(-25%) rotate(45deg); }
 
 
 /*

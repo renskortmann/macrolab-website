@@ -4,14 +4,12 @@
  * /admin/time) and for lab managers (at /time/overview).
  *
  * Top to bottom: the filter on one line; the entries with the hours per
- * activity, folded until opened (and open right after the filter was used);
- * the totals and the CSV export.
+ * activity; the totals and the CSV export. Every card folds (app.js).
  *
  * Read-only on purpose: there is no approval step, and nobody edits somebody
  * else's timesheet. See Macrolab\Time\TimeEntryPolicy.
  *
  * @var string                                     $basePath  /admin/time or /time/overview
- * @var bool                                       $filtered  the filter was just used
  * @var \Macrolab\Time\TimeFilter                  $filter
  * @var list<\Macrolab\Time\TimeEntry>             $entries
  * @var array{entries: int, minutes: int}          $totals
@@ -71,11 +69,7 @@ use Macrolab\Time\TimeRules;
 </section>
 
 <section class="card">
-<details class="foldable"<?= $filtered ? ' open' : '' ?>>
-    <summary>
-        <h2>Time registrations overview</h2>
-        <span class="fold-arrow" aria-hidden="true"></span>
-    </summary>
+    <h2>Time registrations overview</h2>
 
     <?php if ($entries === []): ?>
         <p class="muted">Nothing logged in that range.</p>
@@ -116,7 +110,6 @@ use Macrolab\Time\TimeRules;
             <?php endforeach; ?>
         </dl>
     <?php endif; ?>
-</details>
 </section>
 
 <section class="card">

@@ -19,8 +19,8 @@ use Macrolab\Time\TimeEntryService;
 use Macrolab\Users;
 
 /**
- * "My time registrations" under the day sheet: folded at first, one month at
- * a time between two arrows, oldest entry first.
+ * "My time registrations" under the day sheet: one month at a time between
+ * two arrows, oldest entry first. It folds like every card (app.js).
  */
 final class TimeMonthListTest extends DatabaseTestCase
 {
@@ -50,12 +50,12 @@ final class TimeMonthListTest extends DatabaseTestCase
         Auth::resetCache();
     }
 
-    public function testTheSectionIsTitledAndStartsFolded(): void
+    public function testTheSectionIsAPlainCardTitledFirst(): void
     {
         $body = $this->page();
 
-        self::assertStringContainsString('<h2>My time registrations</h2>', $body);
-        self::assertStringContainsString('<details class="foldable">', $body, 'folded: no open attribute');
+        self::assertMatchesRegularExpression('#<section class="card" id="time-month"[^>]*>\s*<h2>My time registrations</h2>#', $body);
+        self::assertStringNotContainsString('<details', $body);
         self::assertStringContainsString('<span class="day-label month-label">September 2026</span>', $body);
     }
 
@@ -69,12 +69,12 @@ final class TimeMonthListTest extends DatabaseTestCase
         self::assertStringContainsString('aria-label="Next month: October 2026"', $body);
     }
 
-    public function testArrivingByAMonthArrowOpensTheSection(): void
+    public function testAMonthInTheAddressIsShown(): void
     {
-        $body = $this->page(['month' => '2026-08']);
-
-        self::assertStringContainsString('<details class="foldable" open>', $body);
-        self::assertStringContainsString('<span class="day-label month-label">August 2026</span>', $body);
+        self::assertStringContainsString(
+            '<span class="day-label month-label">August 2026</span>',
+            $this->page(['month' => '2026-08'])
+        );
     }
 
     public function testEntriesAreListedOldestFirst(): void

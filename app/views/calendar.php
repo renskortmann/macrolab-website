@@ -78,14 +78,11 @@ use Macrolab\Clock;
 
 <?php /* The administrator holds no bookings of their own, so has no list. */ ?>
 <?php if ($actor->userId() !== null): ?>
-    <section class="card">
-        <?php /* Open or closed is remembered per browser by app.js. */ ?>
-        <details class="my-bookings" id="my-bookings" open>
-            <summary><h2>My upcoming bookings</h2></summary>
-            <div id="my-bookings-list" data-url="<?= e(path('/api/bookings/mine')) ?>">
-                <?= \Macrolab\View::render('my_bookings', ['bookings' => $mine]) ?>
-            </div>
-        </details>
+    <section class="card" id="my-bookings">
+        <h2>My upcoming bookings</h2>
+        <div id="my-bookings-list" data-url="<?= e(path('/api/bookings/mine')) ?>">
+            <?= \Macrolab\View::render('my_bookings', ['bookings' => $mine]) ?>
+        </div>
     </section>
 <?php endif; ?>
 

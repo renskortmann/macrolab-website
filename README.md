@@ -515,6 +515,12 @@ Shared by both systems:
 - **Times.** Every timestamp is stored in UTC and rendered in
   `app.display_timezone`. The one exception is the day a time entry is for,
   which is a plain calendar date and never shifted by a timezone.
+- **Every card folds.** Each section (`<section class="card">`) has an open
+  arrowhead in its upper right corner - up while open, down while folded -
+  and clicking it or the heading folds the card. Cards start open, and nothing
+  is remembered. `wireFoldableCards()` in `app.js` does this for every card
+  that starts with its heading; `tests/Unit/CardsCanFoldTest.php` keeps it
+  that way. Without the script every card is simply open.
 - **Dates are shown and typed day first** (08-10-2026), or written out
   ("Thu 8 Oct 2026"). Browsers display their built-in date input in the
   browser's language - month first in an American one - and a page cannot
@@ -572,9 +578,8 @@ nobody books the wrong equipment by accident. `/booking?equipment=<slug>`
 links straight to one piece.
 
 Under the calendar, members see **My upcoming bookings** for all equipment,
-each with a link to that equipment's calendar. The list folds open and shut
-(the browser remembers which) and refreshes itself after a booking is made,
-moved or cancelled.
+each with a link to that equipment's calendar. The list refreshes itself after
+a booking is made, moved or cancelled.
 
 A piece of equipment with bookings on record cannot be deleted, only retired -
 the same reasoning as suspending a user rather than deleting them, so the
@@ -609,8 +614,7 @@ against that equipment's calendar.
 
 Below the day sheet, **My time registrations** lists one month of the
 technician's own entries, oldest first, with arrows to the previous and next
-month and a total per activity. It starts folded; the arrowhead in its upper
-right corner opens it.
+month and a total per activity.
 
 Employees own their entries and can change or remove their own at any time -
 and only their own. A request naming somebody else's entry is refused with 403
@@ -625,8 +629,7 @@ or by semicolons. That view is **read-only**: there is no approval step, and
 nobody edits somebody else's timesheet. The page has the filter on one line
 at the top, then **Time registrations overview** - the entries, oldest first,
 five rows at a time with an always-visible scrollbar, and the hours per
-activity - folded until opened (it opens after **Show**), then **Export to
-CSV** with the totals and the download links.
+activity - then **Export to CSV** with the totals and the download links.
 
 An activity with time on record cannot be deleted, only retired - the same
 reasoning as retiring a piece of equipment. For the same reason, an account with time
