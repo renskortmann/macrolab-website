@@ -53,6 +53,8 @@ final class CalendarController
                 'timezone'         => $rules->timezone,
                 'isAdmin'          => $actor->isAdmin,
                 'userId'           => $actor->userId(),
+                // Shown as "Booked for" when a member opens a new booking.
+                'userLabel'        => $actor->label(),
                 'nowIso'           => Clock::now()->setTimezone($rules->zone())->format('c'),
             ],
         ]);

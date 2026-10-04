@@ -106,7 +106,7 @@
         var form = document.getElementById('booking-form');
         var titleEl = document.getElementById('booking-dialog-title');
         var errorEl = document.getElementById('booking-dialog-error');
-        var ownerEl = document.getElementById('booking-dialog-owner');
+        var forEl = document.getElementById('booking-dialog-for');
         var start = whenField('start');
         var end = whenField('end');
         var purposeEl = document.getElementById('booking-purpose');
@@ -270,7 +270,10 @@
             end.set(endsAt);
             purposeEl.value = '';
             if (ownerNetidEl) { ownerNetidEl.value = ''; }
-            ownerEl.hidden = true;
+            /* The admin books for someone else, named by netID in the form. */
+            forEl.textContent = cfg.isAdmin
+                ? 'the person whose netID you enter below'
+                : cfg.userLabel + ' (you)';
             deleteBtn.hidden = true;
             showError(null);
             open();
@@ -283,9 +286,7 @@
                 /* Someone else's booking: show who has the machine, nothing more. */
                 editing = null;
                 titleEl.textContent = 'Booked';
-                ownerEl.textContent = props.owner + ' has the machine from ' +
-                    timeOf(event.start) + ' to ' + timeOf(event.end) + '.';
-                ownerEl.hidden = false;
+                forEl.textContent = ownerText(props);
                 start.set(event.start);
                 end.set(event.end);
                 purposeEl.value = '';
@@ -299,11 +300,7 @@
 
             editing = event;
             titleEl.textContent = props.own ? 'Your booking' : 'Booking for ' + props.owner;
-            ownerEl.hidden = props.own;
-            if (!props.own) {
-                ownerEl.textContent = 'Owner: ' + props.owner +
-                    (props.ownerNetid ? ' (' + props.ownerNetid + ')' : '');
-            }
+            forEl.textContent = props.own ? cfg.userLabel + ' (you)' : ownerText(props);
             start.set(event.start);
             end.set(event.end);
             purposeEl.value = props.purpose || '';
@@ -313,6 +310,11 @@
             deleteBtn.hidden = false;
             showError(null);
             open();
+        }
+
+        /* Who a booking belongs to; the netID only when the server sends it. */
+        function ownerText(props) {
+            return props.owner + (props.ownerNetid ? ' (' + props.ownerNetid + ')' : '');
         }
 
         function open() {
@@ -728,9 +730,5 @@
         var parts = time.split(':');
 
         return Number(parts[0]) * 60 + Number(parts[1]);
-    }
-
-    function timeOf(date) {
-        return date ? pad2(date.getHours()) + ':' + pad2(date.getMinutes()) : '?';
     }
 })();

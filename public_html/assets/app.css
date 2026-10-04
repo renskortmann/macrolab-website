@@ -121,6 +121,10 @@ legend { padding: 0 0.4rem; font-weight: 600; }
 
 .checkrow { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 
+/* The hidden attribute always wins. Rules that set display - buttons below,
+   for one - would otherwise keep a "hidden" element on screen. */
+[hidden] { display: none !important; }
+
 button, .button {
     display: inline-block;
     padding: 0.5rem 0.9rem;
@@ -238,6 +242,7 @@ dialog {
 dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
 dialog menu { display: flex; gap: 0.5rem; justify-content: flex-end; margin: 1.25rem 0 0; padding: 0; }
 dialog menu button.primary { margin-top: 0; }
+dialog dl.facts { margin: 0.25rem 0 0.5rem; }
 
 /* -------------------------------------------------------------- extras --- */
 .invite { border: 1px solid var(--accent); border-radius: var(--radius); padding: 0.75rem 1rem; margin: 1rem 0; }
@@ -315,8 +320,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 .day-label { min-width: 15rem; font-size: 1.05rem; font-weight: 600; text-align: center; }
 
-/* `button` sets display, which would otherwise beat the hidden attribute. */
-.day-label[hidden] { display: none; }
 
 /*
  * With the script running, the printed day is the button and the date input

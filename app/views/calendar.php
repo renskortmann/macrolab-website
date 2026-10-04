@@ -83,7 +83,12 @@ use Macrolab\Clock;
 
         <p id="booking-dialog-error" class="alert" hidden role="alert"></p>
 
-        <p id="booking-dialog-owner" class="muted small" hidden></p>
+        <dl class="facts">
+            <dt>Machine</dt>
+            <dd><?= e($resource === null ? '' : $resource['name']) ?></dd>
+            <dt>Booked for</dt>
+            <dd id="booking-dialog-for"></dd>
+        </dl>
 
         <label for="booking-start-date">Start</label>
         <div class="when">

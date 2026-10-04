@@ -43,6 +43,13 @@ final class CalendarPageTest extends DatabaseTestCase
 
         self::assertStringContainsString((string) $machine['name'], $response->body);
         self::assertSame((int) $machine['id'], $this->config($response)['resourceId']);
+
+        // The booking dialog names the machine and whom the booking is for.
+        self::assertMatchesRegularExpression(
+            '#<dt>Machine</dt>\s*<dd>' . preg_quote((string) $machine['name'], '#') . '</dd>#',
+            $response->body
+        );
+        self::assertSame('kim', $this->config($response)['userLabel']);
     }
 
     public function testTheChoiceIsNotRememberedForTheNextVisit(): void
