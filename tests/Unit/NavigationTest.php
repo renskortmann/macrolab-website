@@ -53,4 +53,25 @@ final class NavigationTest extends TestCase
     {
         self::assertSame($expected, Navigation::current(Navigation::destinations(Actor::forAdmin()), $path));
     }
+
+    /** @return iterable<string, array{string, ?string}> */
+    public static function adminTabPaths(): iterable
+    {
+        yield 'the dashboard'            => ['/admin', '/admin'];
+        yield 'who may sign in'          => ['/admin/users', '/admin/users'];
+        yield 'rules'                    => ['/admin/settings', '/admin/settings'];
+        yield 'system'                   => ['/admin/system', '/admin/system'];
+    }
+
+    #[DataProvider('adminTabPaths')]
+    public function testTheCurrentAdministrationTab(string $path, ?string $expected): void
+    {
+        self::assertSame($expected, Navigation::current(Navigation::adminTabs(), $path));
+    }
+
+    public function testTimeOverviewIsNotAnAdministrationTab(): void
+    {
+        // It is a tab of the top ribbon; listing it twice would mark two tabs.
+        self::assertNotContains('/admin/time', array_column(Navigation::adminTabs(), 'href'));
+    }
 }

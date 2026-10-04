@@ -63,11 +63,21 @@ body {
 .topbar nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .topbar .who { color: var(--ink-muted); }
 
+/* The second row of tabs on the Administration pages, under the top bar. */
+.subtabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 0.25rem 1.25rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+}
+
 /* The destinations as tabs; the current page's is bold, in the accent colour,
    with a bar under it (aria-current, set in layout.php). The hidden bold copy
    of the label (::after) reserves the bold width, so tabs do not shift when
    the current one changes. */
-.topbar a.tab {
+a.tab {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
@@ -76,16 +86,16 @@ body {
     color: var(--ink);
     text-decoration: none;
 }
-.topbar a.tab::after {
+a.tab::after {
     content: attr(data-label);
     height: 0;
     overflow: hidden;
     visibility: hidden;
     font-weight: 600;
 }
-.topbar a.tab:hover { border-bottom-color: var(--line); }
-.topbar a.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.topbar a.tab[aria-current="page"] {
+a.tab:hover { border-bottom-color: var(--line); }
+a.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a.tab[aria-current="page"] {
     color: var(--accent);
     font-weight: 600;
     border-bottom-color: var(--accent);
@@ -341,7 +351,6 @@ dialog dl.facts { margin: 0.25rem 0 0.5rem; }
 .invite { border: 1px solid var(--accent); border-radius: var(--radius); padding: 0.75rem 1rem; margin: 1rem 0; }
 .invite-link { width: 100%; max-width: none; font-family: ui-monospace, monospace; font-size: 0.85rem; }
 
-.admin-nav { display: flex; flex-wrap: wrap; gap: 1rem; }
 
 .qr { margin: 1rem 0; max-width: 240px; }
 .qr svg { width: 100%; height: auto; background: #fff; padding: 0.5rem; border-radius: var(--radius); }

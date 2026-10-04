@@ -24,7 +24,7 @@ final class Navigation
      * wins: /time/overview is Time overview, not Time registration, and
      * /admin/time is the admin's Time overview, not Administration.
      *
-     * @param list<array{href: string, label: string, blurb: string}> $destinations
+     * @param list<array{href: string, label: string, blurb?: string}> $destinations
      */
     public static function current(array $destinations, string $path): ?string
     {
@@ -42,6 +42,27 @@ final class Navigation
         }
 
         return $best;
+    }
+
+    /**
+     * The tabs of the second ribbon on the Administration pages. Time overview
+     * is not among them: it is a tab of the top ribbon already, and on its page
+     * the administration ribbon is not shown (layout.php).
+     *
+     * @return list<array{href: string, label: string}>
+     */
+    public static function adminTabs(): array
+    {
+        return [
+            ['href' => '/admin',           'label' => 'Dashboard'],
+            ['href' => '/admin/users',     'label' => 'Who may sign in'],
+            ['href' => '/admin/equipment', 'label' => 'Equipment'],
+            ['href' => '/admin/bookings',  'label' => 'All bookings'],
+            ['href' => '/admin/projects',  'label' => 'Activities'],
+            ['href' => '/admin/settings',  'label' => 'Rules'],
+            ['href' => '/admin/audit',     'label' => 'Audit log'],
+            ['href' => '/admin/system',    'label' => 'System'],
+        ];
     }
 
     /**

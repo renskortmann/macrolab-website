@@ -16,13 +16,14 @@ use Macrolab\Csrf;
 <section class="card">
     <h1>System</h1>
 
+    <p class="muted small">
+        Maintenance that needs no shell: database updates, a check of this
+        server, and your own sign-in.
+    </p>
+
     <?php if ($error !== null): ?>
         <p class="alert" role="alert"><?= e($error) ?></p>
     <?php endif; ?>
-
-    <nav class="admin-nav">
-        <a href="<?= e(path('/admin')) ?>">Back to administration</a>
-    </nav>
 </section>
 
 <?php if ($newCodes !== []): ?>

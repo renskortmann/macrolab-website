@@ -54,6 +54,21 @@ $flashes = Session::takeFlashes();
     </nav>
 </header>
 
+<?php /* Under the Administration tab: its pages as a second row of tabs. */ ?>
+<?php if ($isAdmin && ($currentTab ?? null) === '/admin'): ?>
+    <?php
+    $adminTabs = Navigation::adminTabs();
+    $currentAdminTab = Navigation::current($adminTabs, Context::request()?->path ?? '');
+    ?>
+    <nav class="subtabs" aria-label="Administration">
+        <?php foreach ($adminTabs as $tab): ?>
+            <a class="tab" href="<?= e(path($tab['href'])) ?>"
+               data-label="<?= e($tab['label']) ?>"
+               <?= $tab['href'] === $currentAdminTab ? 'aria-current="page"' : '' ?>><?= e($tab['label']) ?></a>
+        <?php endforeach; ?>
+    </nav>
+<?php endif; ?>
+
 <main>
     <?php foreach ($flashes as $flash): ?>
         <p class="flash flash-<?= e($flash['type']) ?>"><?= e($flash['message']) ?></p>

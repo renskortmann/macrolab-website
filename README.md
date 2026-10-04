@@ -681,7 +681,7 @@ Shared (`app/src/`):
 | `Auth\ProviderInterface` | the seam TU Delft SSO will slot into (stage 2, not built yet) |
 | `Invite` | single-use links for setting a password |
 | `AdminAuth`, `Crypto` | the administrator's password and one-time codes |
-| `Navigation` | the one list of destinations, shared by the hub and the top bar's tabs, and which tab is current |
+| `Navigation` | the one list of destinations, shared by the hub and the top bar's tabs; the administration tabs of the second ribbon; which tab is current |
 | `Settings` | what the administrator sets in the web UI: both systems' rules, the sign-in mode |
 | `Clock` | UTC storage, display timezone, durations in words |
 | `Audit`, `RateLimit` | the record, and login throttling |

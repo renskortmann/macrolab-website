@@ -13,23 +13,9 @@
 
 use Macrolab\Clock;
 ?>
+<?php /* The administration pages are the tabs under the top bar (layout.php). */ ?>
 <section class="card">
-    <h1>Administration</h1>
-
-    <nav class="admin-nav">
-        <a href="<?= e(path('/admin/users')) ?>">Who may sign in</a>
-        <a href="<?= e(path('/admin/equipment')) ?>">Equipment</a>
-        <a href="<?= e(path('/admin/bookings')) ?>">All bookings</a>
-        <a href="<?= e(path('/admin/projects')) ?>">Activities</a>
-        <a href="<?= e(path('/admin/time')) ?>">Time overview</a>
-        <a href="<?= e(path('/admin/settings')) ?>">Rules</a>
-        <a href="<?= e(path('/admin/audit')) ?>">Audit log</a>
-        <a href="<?= e(path('/admin/system')) ?>">System</a>
-    </nav>
-</section>
-
-<section class="card">
-    <h2>At a glance</h2>
+    <h1>At a glance</h1>
 
     <dl class="facts">
         <dt>Equipment in use</dt>
