@@ -7,7 +7,6 @@ namespace Macrolab\Booking;
 use Macrolab\Clock;
 use Macrolab\Db;
 use Macrolab\Http\HttpException;
-use Macrolab\Session;
 use RuntimeException;
 
 /**
@@ -19,11 +18,9 @@ final class Resources
 {
     private const COLUMNS = 'id, name, slug, description, is_active, created_at';
 
-    /** Where the member's last choice of machine is remembered. */
-    private const SELECTED_KEY = 'selected_machine_slug';
-
     /**
-     * The machine used when nobody has chosen one: the oldest still-active row.
+     * The oldest still-active machine. The calendar never picks it for anyone
+     * (see selected()); tests and scripts use it as "a machine".
      *
      * @return array<string, mixed>
      */
@@ -92,35 +89,24 @@ final class Resources
     }
 
     /**
-     * The machine a request is about: the one named in the URL, else the one
-     * remembered from last time, else the primary.
+     * The machine the calendar shows: the active one named in the URL, or none.
      *
-     * A slug that no longer exists - or that has since been deactivated - falls
-     * back rather than failing, so an old link or a stale session still lands
-     * somewhere useful.
+     * Nothing is remembered between visits and there is no default: the
+     * calendar starts empty until the member picks a machine, so nobody books
+     * the wrong instrument by accident. An unknown or retired slug - an old
+     * link - also gives none rather than an error.
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed>|null
      */
-    public static function resolve(?string $slug): array
+    public static function selected(?string $slug): ?array
     {
-        foreach ([$slug, Session::get(self::SELECTED_KEY)] as $candidate) {
-            if (!is_string($candidate) || $candidate === '') {
-                continue;
-            }
-
-            $row = self::findBySlug($candidate);
-
-            if ($row !== null && (int) $row['is_active'] === 1) {
-                Session::set(self::SELECTED_KEY, (string) $row['slug']);
-
-                return $row;
-            }
+        if ($slug === null || $slug === '') {
+            return null;
         }
 
-        $row = self::primary();
-        Session::set(self::SELECTED_KEY, (string) $row['slug']);
+        $row = self::findBySlug($slug);
 
-        return $row;
+        return $row !== null && (int) $row['is_active'] === 1 ? $row : null;
     }
 
     /**

@@ -95,6 +95,13 @@
         var feedUrl = el.dataset.feed;
         var csrf = el.dataset.csrf;
 
+        /* No machine picked yet: an empty, read-only calendar that points to
+           the picker when someone tries to book. */
+        var hasMachine = cfg.resourceId !== null;
+        var noticeEl = document.getElementById('calendar-notice');
+        var machineEl = document.getElementById('machine');
+        var noticeTimer = null;
+
         var dialog = document.getElementById('booking-dialog');
         var form = document.getElementById('booking-form');
         var titleEl = document.getElementById('booking-dialog-title');
@@ -195,10 +202,15 @@
             listDayFormat: function (arg) {
                 return arg.date.day + ' ' + MONTHS[arg.date.month] + ' ' + arg.date.year;
             },
-            events: loadEvents,
+            events: hasMachine ? loadEvents : [],
             select: function (info) {
-                openCreate(info.start, info.end);
                 calendar.unselect();
+                if (!hasMachine) {
+                    notice('Please choose a machine first, then pick a time.');
+                    if (machineEl) { machineEl.focus(); }
+                    return;
+                }
+                openCreate(info.start, info.end);
             },
             eventClick: function (info) {
                 openEvent(info.event);
@@ -208,6 +220,17 @@
         });
 
         calendar.render();
+
+        /* A short message above the calendar that clears itself. */
+        function notice(text) {
+            if (!noticeEl) {
+                return;
+            }
+            noticeEl.textContent = text;
+            noticeEl.hidden = false;
+            clearTimeout(noticeTimer);
+            noticeTimer = setTimeout(function () { noticeEl.hidden = true; }, 6000);
+        }
 
         /* ------------------------------------------------------------ data */
 

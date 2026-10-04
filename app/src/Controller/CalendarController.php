@@ -17,17 +17,20 @@ use Macrolab\View;
 
 /**
  * The booking calendar, one machine at a time. Reached from the hub at /.
+ *
+ * Plain /booking shows no machine: the calendar is empty and read-only until
+ * the member picks one, which reloads the page as /booking?machine=<slug>.
  */
 final class CalendarController
 {
     public function show(Request $request): Response
     {
         $actor = Auth::requireActor();
-        $resource = Resources::resolve($request->query('machine'));
+        $resource = Resources::selected($request->query('machine'));
         $rules = RuleSet::fromSettings();
 
         return View::page('calendar', [
-            'title'    => (string) $resource['name'],
+            'title'    => $resource === null ? 'Booking' : (string) $resource['name'],
             'resource' => $resource,
             'machines' => Resources::allActive(),
             'actor'    => $actor,
@@ -37,7 +40,9 @@ final class CalendarController
             // Handed to the browser as data attributes; the client mirrors the
             // rules for a civilised UI, but the server is what enforces them.
             'clientRules' => [
-                'resourceId'       => (int) $resource['id'],
+                // null until a machine is picked: the browser then shows an
+                // empty, read-only calendar.
+                'resourceId'       => $resource === null ? null : (int) $resource['id'],
                 'slotMinutes'      => $rules->slotMinutes,
                 'openTime'         => $rules->openTime,
                 'closeTime'        => $rules->closeTime,

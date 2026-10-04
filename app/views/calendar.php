@@ -4,7 +4,7 @@
  * it needs is handed over in a data attribute, because the content security
  * policy allows no inline script.
  *
- * @var array<string, mixed>       $resource
+ * @var array<string, mixed>|null  $resource     null until a machine is picked
  * @var list<array<string, mixed>> $machines
  * @var \Macrolab\Actor            $actor
  * @var \Macrolab\Booking\RuleSet  $rules
@@ -18,24 +18,30 @@ use Macrolab\Clock;
 <section class="card">
     <div class="calendar-head">
         <div>
-            <h1><?= e($resource['name']) ?></h1>
-            <?php if (!empty($resource['description'])): ?>
+            <h1><?= e($resource === null ? 'Booking' : $resource['name']) ?></h1>
+            <?php if ($resource !== null && !empty($resource['description'])): ?>
                 <p class="muted"><?= e($resource['description']) ?></p>
             <?php endif; ?>
 
-            <?php if (count($machines) > 1): ?>
-                <form method="get" action="<?= e(path('/booking')) ?>" class="machine-picker">
-                    <label for="machine">Machine</label>
-                    <select id="machine" name="machine" data-auto-submit>
-                        <?php foreach ($machines as $machine): ?>
-                            <option value="<?= e($machine['slug']) ?>"
-                                <?= $machine['slug'] === $resource['slug'] ? 'selected' : '' ?>>
-                                <?= e($machine['name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <button type="submit">Show</button>
-                </form>
+            <?php /* Always shown, even for one machine: nothing is preselected. */ ?>
+            <form method="get" action="<?= e(path('/booking')) ?>" class="machine-picker">
+                <label for="machine">Machine</label>
+                <select id="machine" name="machine" data-auto-submit>
+                    <?php if ($resource === null): ?>
+                        <option value="" selected disabled>Choose a machine&hellip;</option>
+                    <?php endif; ?>
+                    <?php foreach ($machines as $machine): ?>
+                        <option value="<?= e($machine['slug']) ?>"
+                            <?= $resource !== null && $machine['slug'] === $resource['slug'] ? 'selected' : '' ?>>
+                            <?= e($machine['name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit">Show</button>
+            </form>
+
+            <?php if ($resource === null): ?>
+                <p class="muted small">Choose a machine to see and make bookings.</p>
             <?php endif; ?>
         </div>
 
@@ -60,6 +66,8 @@ use Macrolab\Clock;
                 : 'with no limit on how many you may hold' ?>.
         <?php endif; ?>
     </p>
+
+    <p id="calendar-notice" class="flash flash-info" role="status" hidden></p>
 
     <div id="calendar"
          data-feed="<?= e(path('/api/bookings')) ?>"

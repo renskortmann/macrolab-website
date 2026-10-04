@@ -82,14 +82,22 @@ final class AdminTimeController
         $filter = TimeFilter::fromRequest($request);
         $entries = TimeEntries::search($filter, 5000);
 
+        // Two flavours of the same rows. Semicolons with a decimal comma are
+        // what Excel with Dutch and most European regional settings splits and
+        // sums; commas with a decimal point suit everything else.
+        $semicolon = $request->query('sep') === 'semicolon';
+        $separator = $semicolon ? ';' : ',';
+        $decimal = $semicolon ? ',' : '.';
+
         // A bulk read of who worked how long on what. The audit log is the
         // existing mechanism for recording exactly that.
         Audit::log('time_exported', 'time_entry', null, [
-            'from'    => $filter->from->format('Y-m-d'),
-            'to'      => $filter->to->format('Y-m-d'),
-            'user'    => $filter->userId,
-            'project' => $filter->projectId,
-            'rows'    => count($entries),
+            'from'      => $filter->from->format('Y-m-d'),
+            'to'        => $filter->to->format('Y-m-d'),
+            'user'      => $filter->userId,
+            'project'   => $filter->projectId,
+            'rows'      => count($entries),
+            'separator' => $semicolon ? 'semicolon' : 'comma',
         ]);
 
         $body = Csv::fromRows(
@@ -103,13 +111,14 @@ final class AdminTimeController
                     $e->projectCode,
                     // Both: the decimal for a spreadsheet to sum, the integer
                     // because it is the exact stored value.
-                    TimeRules::decimalHours($e->minutes),
+                    TimeRules::decimalHours($e->minutes, $decimal),
                     $e->minutes,
                     $e->note,
                     $e->id,
                 ],
                 $entries
-            )
+            ),
+            $separator
         );
 
         return Response::download($body, $filter->filenameStem() . '.csv');

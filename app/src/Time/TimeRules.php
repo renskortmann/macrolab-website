@@ -154,10 +154,13 @@ final class TimeRules
         return intdiv($minutes, 60) . ':' . sprintf('%02d', $minutes % 60);
     }
 
-    /** Minutes as a decimal hour count, for the CSV export to sum. */
-    public static function decimalHours(int $minutes): string
+    /**
+     * Minutes as a decimal hour count, for the CSV export to sum: "3.50", or
+     * "3,50" for spreadsheets set up for a decimal comma.
+     */
+    public static function decimalHours(int $minutes, string $decimalSeparator = '.'): string
     {
-        return number_format(max(0, $minutes) / 60, 2, '.', '');
+        return number_format(max(0, $minutes) / 60, 2, $decimalSeparator, '');
     }
 
     /**

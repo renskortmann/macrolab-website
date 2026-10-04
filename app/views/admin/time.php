@@ -56,13 +56,19 @@ use Macrolab\Time\TimeRules;
     </dl>
 
     <p>
-        <a href="<?= e(path('/admin/time.csv?' . $filter->queryString())) ?>">Export these rows as CSV</a>
+        Export these rows as CSV:
+        <a href="<?= e(path('/admin/time.csv?' . $filter->queryString() . '&sep=semicolon')) ?>">with semicolons</a>
+        or
+        <a href="<?= e(path('/admin/time.csv?' . $filter->queryString() . '&sep=comma')) ?>">with commas</a>
     </p>
 
     <p class="muted small">
-        The export covers exactly what the filter above shows. Excel opens it
-        through <em>Data &rarr; From Text/CSV</em> if a double-click does not
-        split the columns.
+        The export covers exactly what the filter above shows. Choose
+        <em>semicolons</em> for Excel with Dutch or other European settings:
+        the hours then use a decimal comma (3,50), so Excel can add them up.
+        Choose <em>commas</em> for other spreadsheets and English settings
+        (3.50). If a double-click does not split the columns, open the file
+        through <em>Data &rarr; From Text/CSV</em>.
     </p>
 </section>
 

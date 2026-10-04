@@ -531,9 +531,12 @@ Instrument booking:
 
 The administrator manages the bookable machines at `/admin/machines`. Each
 booking belongs to one machine, and the calendar shows one machine at a time:
-its name is the heading, and a dropdown switches between them. The choice is
-remembered for the next visit, and `/booking?machine=<slug>` links straight to
-one.
+its name is the heading, and a dropdown switches between them. A visit to
+`/booking` starts with no machine selected: the calendar stays empty and
+read-only until one is chosen, and trying to book before that asks the member
+to choose a machine first. Nothing is remembered between visits, so nobody
+books the wrong instrument by accident. `/booking?machine=<slug>` links
+straight to one.
 
 A machine with bookings on record cannot be deleted, only retired - the same
 reasoning as suspending a user rather than deleting them, so the record of who

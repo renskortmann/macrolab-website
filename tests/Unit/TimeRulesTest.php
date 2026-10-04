@@ -58,6 +58,7 @@ final class TimeRulesTest extends TestCase
         self::assertSame(210, TimeRules::parseHours('3.5'));
         self::assertSame('3:30', TimeRules::formatHours(210));
         self::assertSame('3.50', TimeRules::decimalHours(210));
+        self::assertSame('3,50', TimeRules::decimalHours(210, ','), 'decimal comma for European spreadsheets');
     }
 
     public function testFormatHoursPadsTheMinutes(): void

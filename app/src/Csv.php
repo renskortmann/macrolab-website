@@ -19,8 +19,11 @@ final class Csv
     /**
      * @param list<string>          $header
      * @param iterable<list<mixed>> $rows
+     * @param string                $separator ',' or ';' - the latter is what
+     *                                         Excel with Dutch and most other
+     *                                         European regional settings expects
      */
-    public static function fromRows(array $header, iterable $rows): string
+    public static function fromRows(array $header, iterable $rows, string $separator = ','): string
     {
         $stream = fopen('php://temp', 'r+');
 
@@ -28,10 +31,10 @@ final class Csv
             throw new RuntimeException('Could not open a temporary stream to build the CSV.');
         }
 
-        fputcsv($stream, array_map([self::class, 'cell'], $header));
+        fputcsv($stream, array_map([self::class, 'cell'], $header), $separator);
 
         foreach ($rows as $row) {
-            fputcsv($stream, array_map([self::class, 'cell'], $row));
+            fputcsv($stream, array_map([self::class, 'cell'], $row), $separator);
         }
 
         rewind($stream);

