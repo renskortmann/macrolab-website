@@ -30,7 +30,9 @@ final class CalendarController
         $rules = RuleSet::fromSettings();
 
         return View::page('calendar', [
-            'title'         => $equipment === null ? 'Booking' : (string) $equipment['name'],
+            // Neither the heading nor the browser tab changes with the
+            // equipment; the date label above the calendar names it.
+            'title'         => 'Booking',
             'equipment'     => $equipment,
             'equipmentList' => Equipment::allActive(),
             'actor'    => $actor,
@@ -43,6 +45,8 @@ final class CalendarController
                 // null until a piece of equipment is picked: the browser then shows an
                 // empty, read-only calendar.
                 'equipmentId'      => $equipment === null ? null : (int) $equipment['id'],
+                // Leads the date label above the calendar.
+                'equipmentName'    => $equipment === null ? null : (string) $equipment['name'],
                 'slotMinutes'      => $rules->slotMinutes,
                 'openTime'         => $rules->openTime,
                 'closeTime'        => $rules->closeTime,

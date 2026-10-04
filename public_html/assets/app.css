@@ -254,9 +254,7 @@ dl.facts dd { margin: 0; }
 code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; }
 
 /* ------------------------------------------------------------ calendar --- */
-.calendar-head { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: flex-start; }
-
-.legend { display: flex; gap: 1rem; list-style: none; margin: 0; padding: 0; font-size: 0.85rem; }
+.legend { display: flex; gap: 1rem; list-style: none; margin: 0 0 0.75rem; padding: 0; font-size: 0.85rem; }
 .swatch { display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 2px; vertical-align: middle; }
 .swatch.own { background: var(--own); }
 .swatch.other { background: var(--other); }
@@ -290,6 +288,12 @@ input[type="text"].date-text { width: 8.5rem; max-width: 8.5rem; }
    calendar answers "what is mine" at a glance. */
 .fc-event.booking-own { background: var(--own); border-color: var(--own); color: #fff; }
 .fc-event.booking-other { background: var(--other); border-color: var(--other); color: #fff; }
+
+/* The label above the calendar - "LUNA OD6 28 Sep - 1 Oct 2026" - may be
+   long; let it take the room between the buttons and wrap onto more lines. */
+.fc .fc-header-toolbar { flex-wrap: wrap; gap: 0.5rem; }
+.fc .fc-toolbar-chunk:nth-child(2) { flex: 1 1 12rem; min-width: 0; text-align: center; }
+.fc .fc-toolbar-title { white-space: normal; overflow-wrap: anywhere; line-height: 1.25; }
 
 dialog {
     border: 1px solid var(--line);

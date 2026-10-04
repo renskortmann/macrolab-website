@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Every card folds (wireFoldableCards() in app.js), which needs a heading at
- * the top of the card: an h1 or h2, or the calendar's header row holding one.
+ * the top of the card: an h1 or h2. Everything after it folds away.
  * A card without that would be the one card on the site that does not fold.
  */
 final class CardsCanFoldTest extends TestCase
@@ -30,7 +30,7 @@ final class CardsCanFoldTest extends TestCase
             foreach ($matches[1] as $after) {
                 // Skip whitespace and PHP comments; then the heading must come.
                 $after = (string) preg_replace('#^(\s|<\?php\s*/\*.*?\*/\s*\?>)*#s', '', $after);
-                if (preg_match('#^(<h1|<h2|<div class="calendar-head">)#', $after) !== 1) {
+                if (preg_match('#^(<h1|<h2)#', $after) !== 1) {
                     $offenders[] = substr($file->getPathname(), strlen($views) + 1) . ': ' . strtok($after, "\n");
                 }
             }

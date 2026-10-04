@@ -17,40 +17,30 @@ use Macrolab\Booking\BookingRules;
 use Macrolab\Clock;
 ?>
 <section class="card">
-    <div class="calendar-head">
-        <div>
-            <h1><?= e($equipment === null ? 'Booking' : $equipment['name']) ?></h1>
-            <?php if ($equipment !== null && !empty($equipment['description'])): ?>
-                <p class="muted"><?= e($equipment['description']) ?></p>
-            <?php endif; ?>
+    <h1>Equipment booking calendar</h1>
 
-            <?php /* Always shown, even for a single piece: nothing is preselected. */ ?>
-            <form method="get" action="<?= e(path('/booking')) ?>" class="equipment-picker">
-                <label for="equipment">Equipment</label>
-                <select id="equipment" name="equipment" data-auto-submit>
-                    <?php if ($equipment === null): ?>
-                        <option value="" selected disabled>Choose equipment&hellip;</option>
-                    <?php endif; ?>
-                    <?php foreach ($equipmentList as $piece): ?>
-                        <option value="<?= e($piece['slug']) ?>"
-                            <?= $equipment !== null && $piece['slug'] === $equipment['slug'] ? 'selected' : '' ?>>
-                            <?= e($piece['name']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <button type="submit">Show</button>
-            </form>
-
+    <?php /* Always shown, even for a single piece: nothing is preselected. */ ?>
+    <form method="get" action="<?= e(path('/booking')) ?>" class="equipment-picker">
+        <label for="equipment">Equipment</label>
+        <select id="equipment" name="equipment" data-auto-submit>
             <?php if ($equipment === null): ?>
-                <p class="muted small">Choose a piece of equipment to see and make bookings.</p>
+                <option value="" selected disabled>Choose equipment&hellip;</option>
             <?php endif; ?>
-        </div>
+            <?php foreach ($equipmentList as $piece): ?>
+                <option value="<?= e($piece['slug']) ?>"
+                    <?= $equipment !== null && $piece['slug'] === $equipment['slug'] ? 'selected' : '' ?>>
+                    <?= e($piece['name']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <button type="submit">Show</button>
+    </form>
 
-        <ul class="legend">
-            <li><span class="swatch own"></span> Your bookings</li>
-            <li><span class="swatch other"></span> Someone else</li>
-        </ul>
-    </div>
+    <?php if ($equipment === null): ?>
+        <p class="muted small">Choose a piece of equipment to see and make bookings.</p>
+    <?php elseif (!empty($equipment['description'])): ?>
+        <p class="muted"><?= e($equipment['description']) ?></p>
+    <?php endif; ?>
 
     <p class="muted small rules-summary">
         <?php if ($actor->isAdmin): ?>
@@ -67,6 +57,11 @@ use Macrolab\Clock;
                 : 'with no limit on how many you may hold' ?>.
         <?php endif; ?>
     </p>
+
+    <ul class="legend">
+        <li><span class="swatch own"></span> Your bookings</li>
+        <li><span class="swatch other"></span> Someone else</li>
+    </ul>
 
     <p id="calendar-notice" class="flash calendar-notice" role="status" hidden></p>
 

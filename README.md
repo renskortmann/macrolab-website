@@ -570,12 +570,13 @@ the `equipment` table, `bookings.equipment_id`).
 
 The administrator manages the bookable equipment at `/admin/equipment`. Each
 booking belongs to one piece of equipment, and the calendar shows one piece at
-a time: its name is the heading, and a dropdown switches between them. A visit
-to `/booking` starts with no equipment selected: the calendar stays empty and
-read-only until a piece is chosen, and trying to book before that asks the
-member to choose the equipment first. Nothing is remembered between visits, so
-nobody books the wrong equipment by accident. `/booking?equipment=<slug>`
-links straight to one piece.
+a time: a dropdown under the "Equipment booking calendar" heading switches
+between them, and the date label above the calendar starts with the
+equipment's name. A visit to `/booking` starts with no equipment selected:
+the calendar stays empty and read-only until a piece is chosen, and trying to
+book before that asks the member to choose the equipment first. Nothing is
+remembered between visits, so nobody books the wrong equipment by accident.
+`/booking?equipment=<slug>` links straight to one piece.
 
 Under the calendar, members see **My upcoming bookings** for all equipment,
 each with a link to that equipment's calendar. The list refreshes itself after

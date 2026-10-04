@@ -294,7 +294,16 @@
             /* Dates are spelled out day first. The bundled library carries no
                locale data, so its own defaults would read as American; these
                callbacks decide the wording rather than the viewer's browser. */
-            titleFormat: function (arg) { return rangeLabel(arg.start, arg.end); },
+            /* The equipment's name leads the date: "LUNA OD6 28 Sep - 1 Oct 2026".
+               The dates are kept together - non-breaking spaces, and a word
+               joiner after the dash, which is otherwise a place to break - so
+               a long label wraps between the name and the dates. */
+            titleFormat: function (arg) {
+                var dates = rangeLabel(arg.start, arg.end)
+                    .replace(/ /g, '\u00a0')
+                    .replace(/-/g, '-\u2060');
+                return cfg.equipmentName ? cfg.equipmentName + ' ' + dates : dates;
+            },
             dayHeaderFormat: function (arg) {
                 return WEEKDAYS[arg.date.marker.getUTCDay()] + ' ' + arg.date.day + ' ' +
                     MONTHS[arg.date.month];

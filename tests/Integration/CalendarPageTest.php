@@ -56,6 +56,26 @@ final class CalendarPageTest extends DatabaseTestCase
         self::assertSame('kim', $this->config($response)['userLabel']);
     }
 
+    public function testOnlyTheDateLabelNamesTheEquipment(): void
+    {
+        $piece = Equipment::primary();
+        $response = $this->show(['equipment' => $piece['slug']]);
+
+        self::assertMatchesRegularExpression('#<section class="card">\s*<h1>Equipment booking calendar</h1>#', $response->body,
+            'the heading does not turn into the equipment name');
+        self::assertStringContainsString('<title>Booking &middot; ', $response->body, 'nor does the browser tab');
+        self::assertSame($piece['name'], $this->config($response)['equipmentName'], 'and so does the date label');
+    }
+
+    public function testTheLegendSitsRightAboveTheCalendar(): void
+    {
+        self::assertMatchesRegularExpression(
+            '#<p class="muted small rules-summary">.*</p>\s*<ul class="legend">.*</ul>\s*'
+            . '<p id="calendar-notice"[^>]*></p>\s*<div id="calendar"#s',
+            $this->show(['equipment' => Equipment::primary()['slug']])->body
+        );
+    }
+
     public function testTheOldMachineParameterNoLongerSelectsAnything(): void
     {
         // ?machine= was dropped when the app switched to "equipment".
