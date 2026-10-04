@@ -48,7 +48,9 @@ DirectoryIndex index.php
     Header always unset X-Powered-By
 </IfModule>
 
-# Cache the vendored calendar assets; they are versioned by filename.
+# Cache scripts, styles and fonts for a week. They are versioned in their URL -
+# the vendored calendar by filename, app.js and app.css by ?v=<modified time>
+# (the asset() helper) - so a deployment still reaches browsers at once.
 <IfModule mod_expires.c>
     ExpiresActive On
     <FilesMatch "\.(js|css|woff2?)$">

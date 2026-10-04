@@ -67,7 +67,7 @@ use Macrolab\Clock;
         <?php endif; ?>
     </p>
 
-    <p id="calendar-notice" class="flash flash-info" role="status" hidden></p>
+    <p id="calendar-notice" class="flash calendar-notice" role="status" hidden></p>
 
     <div id="calendar"
          data-feed="<?= e(path('/api/bookings')) ?>"

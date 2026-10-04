@@ -45,3 +45,28 @@ if (!function_exists('path')) {
         return ($base === '' ? '' : $base) . '/' . ltrim($path, '/');
     }
 }
+
+if (!function_exists('asset')) {
+    /**
+     * Root-relative URL for a file under the document root, with ?v=<modified
+     * time> appended so a browser fetches it again after a deployment.
+     *
+     * .htaccess lets browsers keep .js and .css for a week. Without the version,
+     * members would run last week's app.js against this week's pages.
+     */
+    function asset(string $path): string
+    {
+        $path = '/' . ltrim($path, '/');
+
+        // The document root is public_html beside app/, or - in the fallback
+        // layout - the directory app/ itself sits in.
+        $root = dirname(__DIR__, 2);
+        foreach ([$root . '/public_html' . $path, $root . $path] as $file) {
+            if (is_file($file)) {
+                return path($path) . '?v=' . filemtime($file);
+            }
+        }
+
+        return path($path);
+    }
+}

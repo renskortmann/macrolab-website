@@ -23,7 +23,7 @@ $flashes = Session::takeFlashes();
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title><?= isset($title) ? e($title) . ' &middot; ' : '' ?><?= e(Config::string('app.name', 'Macrolab website')) ?></title>
-    <link rel="stylesheet" href="<?= e(path('/assets/app.css')) ?>">
+    <link rel="stylesheet" href="<?= e(asset('/assets/app.css')) ?>">
 </head>
 <body>
 <header class="topbar">
@@ -61,6 +61,6 @@ $flashes = Session::takeFlashes();
     </p>
 </footer>
 
-<script src="<?= e(path('/assets/app.js')) ?>"></script>
+<script src="<?= e(asset('/assets/app.js')) ?>"></script>
 </body>
 </html>
