@@ -5,11 +5,11 @@ hosting. It contains **two independent systems** behind one sign-in:
 
 | System | URL | Purpose |
 |---|---|---|
-| **Instrument booking** | `/booking` | Lab members reserve time on the lab's instruments. Each machine has a shared calendar; members book, change and cancel their own slots - and only their own. |
+| **Equipment booking** | `/booking` | Lab members reserve time on the lab's equipment. Each piece of equipment has a shared calendar; members book, change and cancel their own slots - and only their own. |
 | **Time registration** | `/time` | Lab technicians log the hours they spend on their activities - maintaining equipment, supporting teaching, tidying up the lab, and so on - so that lab management can see how technician time is distributed over those activities. |
 
 Both kinds of "time" appear, but they have nothing to do with each other:
-booking reserves an *instrument*, time registration records a person's *work*.
+booking reserves *equipment*, time registration records a person's *work*.
 The two systems share the sign-in, the allowlist of who may sign in, the page
 layout and the audit log - nothing else. No table, class or page of one refers
 to the other, and the code is split accordingly (`app/src/Booking/`,
@@ -17,7 +17,7 @@ to the other, and the code is split accordingly (`app/src/Booking/`,
 
 Signing in lands on the **hub** at `/`, which links to what the member's role
 allows (see [Roles](#roles)). One administrator controls who may sign in and
-with which role, manages the machines and the booking rules, can
+with which role, manages the equipment and the booking rules, can
 create, change or delete any booking, maintains the list of activities time is
 logged against, and reads what everyone has logged (see
 [Time registration](#time-registration)).
@@ -538,35 +538,39 @@ Shared by both systems:
   the audit log. No email is sent and the application makes no outbound
   connections of any kind.
 
-Instrument booking:
+Equipment booking:
 
 - **Opening hours** are compared in local wall-clock time, which is what
   "between 08:00 and 18:00" means, so the March and October DST transitions
   cannot produce an ambiguous booking.
-- **Overlaps.** Each booking write takes a row lock on the machine first, so
+- **Overlaps.** Each booking write takes a row lock on the piece of equipment first, so
   two requests cannot both find a slot free and then both fill it. Intervals
   are half-open: a booking ending at 10:00 and one starting at 10:00 do not
   clash.
 
-## Machines
+## Equipment
 
-The administrator manages the bookable machines at `/admin/machines`. Each
-booking belongs to one machine, and the calendar shows one machine at a time:
-its name is the heading, and a dropdown switches between them. A visit to
-`/booking` starts with no machine selected: the calendar stays empty and
-read-only until one is chosen, and trying to book before that asks the member
-to choose a machine first. Nothing is remembered between visits, so nobody
-books the wrong instrument by accident. `/booking?machine=<slug>` links
-straight to one.
+The lab calls what it books **equipment**; one item is a **piece of
+equipment**. The code and the database use the same word (`Booking\Equipment`,
+the `equipment` table, `bookings.equipment_id`).
 
-A machine with bookings on record cannot be deleted, only retired - the same
-reasoning as suspending a user rather than deleting them, so the record of who
-used what stays intact. Retiring one hides it from the picker and stops new
-bookings; the bookings it already has are untouched. The last machine still in
-use cannot be retired.
+The administrator manages the bookable equipment at `/admin/equipment`. Each
+booking belongs to one piece of equipment, and the calendar shows one piece at
+a time: its name is the heading, and a dropdown switches between them. A visit
+to `/booking` starts with no equipment selected: the calendar stays empty and
+read-only until a piece is chosen, and trying to book before that asks the
+member to choose the equipment first. Nothing is remembered between visits, so
+nobody books the wrong equipment by accident. `/booking?equipment=<slug>`
+links straight to one piece.
 
-Booking rules are shared by every machine. The per-person quota counts per
-machine, so filling up one instrument does not lock anybody out of the others.
+A piece of equipment with bookings on record cannot be deleted, only retired -
+the same reasoning as suspending a user rather than deleting them, so the
+record of who used what stays intact. Retiring one hides it from the picker
+and stops new bookings; the bookings it already has are untouched. The last
+piece still in use cannot be retired.
+
+Booking rules are shared by all equipment. The per-person quota counts per
+piece of equipment, so filling up one does not lock anybody out of the others.
 
 ## Time registration
 
@@ -585,10 +589,10 @@ activity, with an optional code of its own. Only lab technicians and lab
 managers can open `/time`; lab users are not shown it (see [Roles](#roles)).
 
 **This system is not connected to the booking system.** A time entry names an
-activity and never a machine. The two halves share the sign-in and nothing else,
+activity and never equipment. The two halves share the sign-in and nothing else,
 which is deliberate: hours are booked to work, not to equipment. Time spent
-maintaining an instrument is logged against a maintenance activity, not against
-that instrument's calendar.
+maintaining a piece of equipment is logged against a maintenance activity, not
+against that equipment's calendar.
 
 Employees own their entries and can change or remove their own at any time -
 and only their own. A request naming somebody else's entry is refused with 403
@@ -603,7 +607,7 @@ or by semicolons. That view is **read-only**: there is no approval step, and
 nobody edits somebody else's timesheet.
 
 An activity with time on record cannot be deleted, only retired - the same
-reasoning as retiring a machine. For the same reason, an account with time
+reasoning as retiring a piece of equipment. For the same reason, an account with time
 registered cannot be removed from the allowlist, only suspended.
 
 The limits on entry length, on the daily total, and on how far ahead or back
@@ -628,7 +632,7 @@ public_html/assets/          stylesheet, script, vendored FullCalendar
 app/config.php               local configuration (gitignored)
 app/routes.php               the whole route table, one section per system
 app/src/                     shared: sign-in, sessions, database, views, audit
-app/src/Booking/             instrument booking (namespace Macrolab\Booking)
+app/src/Booking/             equipment booking (namespace Macrolab\Booking)
 app/src/Time/                time registration (namespace Macrolab\Time)
 app/src/Controller/          the HTTP handlers for both, named after their system
 app/views/                   plain PHP templates; time registration in views/time/
@@ -656,11 +660,11 @@ Shared (`app/src/`):
 | `Clock` | UTC storage, display timezone, durations in words |
 | `Audit`, `RateLimit` | the record, and login throttling |
 
-Instrument booking (`app/src/Booking/`):
+Equipment booking (`app/src/Booking/`):
 
 | Class | What it is for |
 |---|---|
-| `Resources` | the machines that can be booked |
+| `Equipment` | the equipment that can be booked |
 | `Booking`, `Bookings` | one booking, and the queries that find them |
 | `BookingRules`, `RuleSet` | the booking rules, as pure functions |
 | `BookingService` | writes, with the lock and the overlap check |

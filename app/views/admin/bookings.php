@@ -2,7 +2,7 @@
 /**
  * @var list<\Macrolab\Booking\Booking> $bookings
  * @var list<array<string, mixed>>      $users
- * @var list<array<string, mixed>>      $machines
+ * @var list<array<string, mixed>>      $equipmentList
  * @var string                          $filter
  * @var string|null                     $error
  */
@@ -54,11 +54,11 @@ $dateField = static function (string $name, string $label, string $value, string
         <?= Csrf::field() ?>
         <input type="hidden" name="action" value="create">
 
-        <label for="machine">Machine</label>
-        <select id="machine" name="machine" required>
-            <?php foreach ($machines as $machine): ?>
-                <?php if ((int) $machine['is_active'] === 1): ?>
-                    <option value="<?= e($machine['slug']) ?>"><?= e($machine['name']) ?></option>
+        <label for="equipment">Equipment</label>
+        <select id="equipment" name="equipment" required>
+            <?php foreach ($equipmentList as $piece): ?>
+                <?php if ((int) $piece['is_active'] === 1): ?>
+                    <option value="<?= e($piece['slug']) ?>"><?= e($piece['name']) ?></option>
                 <?php endif; ?>
             <?php endforeach; ?>
         </select>
@@ -97,12 +97,12 @@ $dateField = static function (string $name, string $label, string $value, string
     <h2>Bookings</h2>
 
     <form method="get" action="<?= e(path('/admin/bookings')) ?>" class="row">
-        <label for="machine_filter">Show</label>
-        <select id="machine_filter" name="machine" data-auto-submit>
-            <option value="">every machine</option>
-            <?php foreach ($machines as $machine): ?>
-                <option value="<?= e($machine['slug']) ?>" <?= $filter === $machine['slug'] ? 'selected' : '' ?>>
-                    <?= e($machine['name']) ?>
+        <label for="equipment_filter">Show</label>
+        <select id="equipment_filter" name="equipment" data-auto-submit>
+            <option value="">all equipment</option>
+            <?php foreach ($equipmentList as $piece): ?>
+                <option value="<?= e($piece['slug']) ?>" <?= $filter === $piece['slug'] ? 'selected' : '' ?>>
+                    <?= e($piece['name']) ?>
                 </option>
             <?php endforeach; ?>
         </select>
@@ -114,7 +114,7 @@ $dateField = static function (string $name, string $label, string $value, string
     <?php else: ?>
         <table class="wide">
             <thead>
-            <tr><th>When</th><th>Machine</th><th>Who</th><th>Purpose</th><th>Status</th><th>Change</th></tr>
+            <tr><th>When</th><th>Equipment</th><th>Who</th><th>Purpose</th><th>Status</th><th>Change</th></tr>
             </thead>
             <tbody>
             <?php foreach ($bookings as $booking): ?>
@@ -123,7 +123,7 @@ $dateField = static function (string $name, string $label, string $value, string
                         <?= e(Clock::local($booking->startsAt, 'D j M Y')) ?><br>
                         <?= e(Clock::local($booking->startsAt, 'H:i')) ?>-<?= e(Clock::local($booking->endsAt, 'H:i')) ?>
                     </td>
-                    <td><?= e($booking->resourceName ?? '-') ?></td>
+                    <td><?= e($booking->equipmentName ?? '-') ?></td>
                     <td>
                         <?= e($booking->ownerLabel()) ?><br>
                         <code class="small"><?= e($booking->ownerNetid) ?></code>

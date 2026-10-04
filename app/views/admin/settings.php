@@ -45,7 +45,7 @@ $timeField = static function (string $name, string $selected) use ($times): stri
         <?= Csrf::field() ?>
 
         <fieldset>
-            <legend>When the machine can be booked</legend>
+            <legend>When the equipment can be booked</legend>
 
             <label>Days</label>
             <div class="checkrow">
@@ -81,7 +81,7 @@ $timeField = static function (string $name, string $selected) use ($times): stri
                    value="<?= e($settings['max_booking_days'] ?? '1') ?>">
             <p class="muted small">
                 A booking may run across several days. Every day it touches must
-                be a day the machine is open, and it must still start after
+                be a day the equipment is available, and it must still start after
                 opening time and finish before closing time.
             </p>
         </fieldset>
@@ -149,7 +149,7 @@ $timeField = static function (string $name, string $selected) use ($times): stri
             <p class="muted small">
                 These govern the hours technicians log. They are unrelated to
                 the booking rules above: time is logged against an activity
-                under the general lab code, never against a machine.
+                under the general lab code, never against equipment.
             </p>
 
             <label for="time_min_entry_minutes">Shortest entry (minutes)</label>

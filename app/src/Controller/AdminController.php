@@ -26,7 +26,7 @@ use Macrolab\Password;
 use Macrolab\Qr;
 use Macrolab\RateLimit;
 use Macrolab\Role;
-use Macrolab\Booking\Resources;
+use Macrolab\Booking\Equipment;
 use Macrolab\Session;
 use Macrolab\Settings;
 use Macrolab\Users;
@@ -157,8 +157,8 @@ final class AdminController
             ->setTime(0, 0)->modify('+2 days')->setTimezone(Clock::utc());
 
         $upcoming = [];
-        foreach (Resources::allActive() as $machine) {
-            foreach (Bookings::inWindow((int) $machine['id'], $from, $to) as $booking) {
+        foreach (Equipment::allActive() as $piece) {
+            foreach (Bookings::inWindow((int) $piece['id'], $from, $to) as $booking) {
                 $upcoming[] = $booking;
             }
         }
@@ -167,8 +167,8 @@ final class AdminController
 
         return View::page('admin/dashboard', [
             'title'         => 'Administration',
-            'machines'      => Resources::allActive(),
-            'machineCount'  => Resources::countActive(),
+            'equipmentList'  => Equipment::allActive(),
+            'equipmentCount' => Equipment::countActive(),
             'upcoming'      => $upcoming,
             'userCount'     => (int) Db::get()->value('SELECT COUNT(*) FROM users'),
             'suspended'     => (int) Db::get()->value('SELECT COUNT(*) FROM users WHERE status = "suspended"'),
@@ -335,14 +335,14 @@ final class AdminController
         return $role;
     }
 
-    // ---------------------------------------------------------------- machines
+    // --------------------------------------------------------------- equipment
 
     /**
-     * The bookable machines. A machine with bookings on record is deactivated
-     * rather than deleted, for the same reason a user with bookings is
-     * suspended: the bookings must keep naming what they were for.
+     * The bookable equipment. A piece of equipment with bookings on record is
+     * deactivated rather than deleted, for the same reason a user with bookings
+     * is suspended: the bookings must keep naming what they were for.
      */
-    public function machines(Request $request): Response
+    public function equipment(Request $request): Response
     {
         Auth::requireAdmin();
 
@@ -352,81 +352,81 @@ final class AdminController
             Csrf::verify($request);
 
             try {
-                $this->handleMachineAction($request);
+                $this->handleEquipmentAction($request);
 
-                return Response::redirect('/admin/machines');
+                return Response::redirect('/admin/equipment');
             } catch (RuntimeException $e) {
                 $error = $e->getMessage();
             }
         }
 
-        return View::page('admin/machines', [
-            'title'    => 'Machines',
-            'machines' => Resources::all(),
-            'error'    => $error,
+        return View::page('admin/equipment', [
+            'title'         => 'Equipment',
+            'equipmentList' => Equipment::all(),
+            'error'         => $error,
         ], $error !== null ? 422 : 200);
     }
 
-    private function handleMachineAction(Request $request): void
+    private function handleEquipmentAction(Request $request): void
     {
         $action = $request->post('action', '') ?? '';
 
         if ($action === 'add') {
-            $machine = Resources::create(
+            $piece = Equipment::create(
                 $request->post('name', '') ?? '',
                 $request->post('description'),
             );
-            Audit::log('machine_added', 'resource', (int) $machine['id'],
-                ['name' => $machine['name'], 'slug' => $machine['slug']]);
-            Session::flash('success', $machine['name'] . ' can now be booked.');
+            Audit::log('equipment_added', 'equipment', (int) $piece['id'],
+                ['name' => $piece['name'], 'slug' => $piece['slug']]);
+            Session::flash('success', $piece['name'] . ' can now be booked.');
 
             return;
         }
 
-        $machineId = (int) ($request->post('machine_id', '0') ?? '0');
-        $machine = $machineId > 0 ? Resources::find($machineId) : null;
+        $equipmentId = (int) ($request->post('equipment_id', '0') ?? '0');
+        $piece = $equipmentId > 0 ? Equipment::find($equipmentId) : null;
 
-        if ($machine === null) {
-            throw new RuntimeException('That machine no longer exists.');
+        if ($piece === null) {
+            throw new RuntimeException('That piece of equipment no longer exists.');
         }
 
-        $name = (string) $machine['name'];
+        $name = (string) $piece['name'];
 
         switch ($action) {
             case 'update':
-                Resources::update($machineId, $request->post('name', '') ?? '', $request->post('description'));
-                Audit::log('machine_updated', 'resource', $machineId, ['name' => $name]);
+                Equipment::update($equipmentId, $request->post('name', '') ?? '', $request->post('description'));
+                Audit::log('equipment_updated', 'equipment', $equipmentId, ['name' => $name]);
                 Session::flash('success', 'Saved.');
                 break;
 
             case 'deactivate':
-                if (Resources::countActive() <= 1) {
+                if (Equipment::countActive() <= 1) {
                     throw new RuntimeException(
-                        'This is the only machine still in use. Add another one before retiring ' . $name . '.'
+                        'This is the only piece of equipment still in use. Add another one before retiring ' . $name . '.'
                     );
                 }
 
-                Resources::setActive($machineId, false);
-                Audit::log('machine_deactivated', 'resource', $machineId, ['name' => $name]);
+                Equipment::setActive($equipmentId, false);
+                Audit::log('equipment_deactivated', 'equipment', $equipmentId, ['name' => $name]);
                 Session::flash('success', $name . ' can no longer be booked. Its bookings are untouched.');
                 break;
 
             case 'reactivate':
-                Resources::setActive($machineId, true);
-                Audit::log('machine_reactivated', 'resource', $machineId, ['name' => $name]);
+                Equipment::setActive($equipmentId, true);
+                Audit::log('equipment_reactivated', 'equipment', $equipmentId, ['name' => $name]);
                 Session::flash('success', $name . ' can be booked again.');
                 break;
 
             case 'delete':
-                if (Resources::countBookings($machineId) > 0) {
+                if (Equipment::countBookings($equipmentId) > 0) {
                     throw new RuntimeException(
                         $name . ' has bookings on record. Retire it instead of deleting it, '
                         . 'or delete those bookings first.'
                     );
                 }
 
-                Resources::delete($machineId);
-                Audit::log('machine_deleted', 'resource', null, ['name' => $name]);
+                Equipment::delete($equipmentId);
+                Audit::log('equipment_deleted', 'equipment', null, ['name' => $name]);
                 Session::flash('success', $name . ' has been removed.');
                 break;
 
@@ -457,17 +457,17 @@ final class AdminController
             }
         }
 
-        // An empty filter means every machine.
-        $filter = $request->query('machine', '') ?? '';
-        $filtered = $filter === '' ? null : Resources::findBySlug($filter);
+        // An empty filter means all equipment.
+        $filter = $request->query('equipment', '') ?? '';
+        $filtered = $filter === '' ? null : Equipment::findBySlug($filter);
 
         return View::page('admin/bookings', [
-            'title'    => 'All bookings',
-            'bookings' => Bookings::recent($filtered === null ? null : (int) $filtered['id'], 300, true),
-            'users'    => Users::listAll(),
-            'machines' => Resources::all(),
-            'filter'   => $filtered === null ? '' : (string) $filtered['slug'],
-            'error'    => $error,
+            'title'         => 'All bookings',
+            'bookings'      => Bookings::recent($filtered === null ? null : (int) $filtered['id'], 300, true),
+            'users'         => Users::listAll(),
+            'equipmentList' => Equipment::all(),
+            'filter'        => $filtered === null ? '' : (string) $filtered['slug'],
+            'error'         => $error,
         ], $error !== null ? 422 : 200);
     }
 
@@ -491,9 +491,9 @@ final class AdminController
                 throw new RuntimeException('No user with netID "' . $netid . '" is on the allowlist.');
             }
 
-            $machine = Resources::requireActive($request->post('machine'));
+            $piece = Equipment::requireActive($request->post('equipment'));
 
-            BookingService::create($actor, (int) $machine['id'], $start, $end,
+            BookingService::create($actor, (int) $piece['id'], $start, $end,
                 $request->post('purpose'), $owner->id);
             Session::flash('success', 'Booking created for ' . $owner->netid . '.');
 

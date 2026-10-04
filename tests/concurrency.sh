@@ -6,7 +6,7 @@
 #   export MACROLAB_TEST_DB_NAME=macrolab_test MACROLAB_TEST_DB_USER=... MACROLAB_TEST_DB_PASS=...
 #   bash tests/concurrency.sh
 #
-# This exercises the resource row lock from two separate connections, which is
+# This exercises the equipment row lock from two separate connections, which is
 # the situation it exists for. No web server needed.
 
 set -uo pipefail
@@ -88,4 +88,4 @@ if [[ $failures -gt 0 ]]; then
     exit 1
 fi
 
-echo "All $ROUNDS rounds kept the machine single-booked."
+echo "All $ROUNDS rounds kept the equipment single-booked."

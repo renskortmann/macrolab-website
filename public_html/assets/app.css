@@ -178,7 +178,7 @@ form.row button.primary { margin-top: 0; }
 .alert, .flash-error { background: var(--err-bg); }
 .alert-inline { color: var(--danger); font-size: 0.85rem; }
 
-/* "Choose a machine first" above the booking calendar: red on pale red, with
+/* "Choose the equipment first" above the booking calendar: red on pale red, with
    a matching border, so it is seen at once. Both shades follow dark mode. */
 .calendar-notice {
     color: var(--danger);
@@ -219,9 +219,9 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .when select { width: auto; }
 .when-echo { margin: 0.25rem 0 0; }
 
-.machine-picker { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.75rem; }
-.machine-picker label { margin: 0; }
-.machine-picker select { width: auto; min-width: 12rem; }
+.equipment-picker { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.75rem; }
+.equipment-picker label { margin: 0; }
+.equipment-picker select { width: auto; min-width: 12rem; }
 
 #calendar { margin-top: 0.5rem; }
 

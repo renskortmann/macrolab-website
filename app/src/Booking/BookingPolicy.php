@@ -57,7 +57,7 @@ final class BookingPolicy
 
     /**
      * Whether the actor may see who else booked a slot. Everyone signed in can:
-     * knowing who is on the machine before you is the point of a shared
+     * knowing who has the equipment before you is the point of a shared
      * calendar. What they may not see is anyone else's stated purpose.
      */
     public static function canSeeOwner(?Actor $actor): bool

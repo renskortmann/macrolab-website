@@ -10,29 +10,30 @@ use Macrolab\Http\HttpException;
 use RuntimeException;
 
 /**
- * The bookable machines. Bookings reference a resource row, so the lab can run
- * several instruments from one calendar; the administrator manages the list and
- * each member picks which machine they are looking at.
+ * The bookable equipment. Each booking references one row here - one piece of
+ * equipment - so the lab can run several pieces from one calendar; the
+ * administrator manages the list and each member picks which piece they are
+ * looking at.
  */
-final class Resources
+final class Equipment
 {
     private const COLUMNS = 'id, name, slug, description, is_active, created_at';
 
     /**
-     * The oldest still-active machine. The calendar never picks it for anyone
-     * (see selected()); tests and scripts use it as "a machine".
+     * The oldest still-active piece of equipment. The calendar never picks it
+     * for anyone (see selected()); tests and scripts use it as "a piece".
      *
      * @return array<string, mixed>
      */
     public static function primary(): array
     {
         $row = Db::get()->one(
-            'SELECT ' . self::COLUMNS . ' FROM resources WHERE is_active = 1 ORDER BY id LIMIT 1'
+            'SELECT ' . self::COLUMNS . ' FROM equipment WHERE is_active = 1 ORDER BY id LIMIT 1'
         );
 
         if ($row === null) {
             throw new RuntimeException(
-                'No active machine found. Add one in the administration pages, '
+                'No active equipment found. Add some in the administration pages, '
                 . 'or run app/cli/migrate.php if this is a fresh installation.'
             );
         }
@@ -46,7 +47,7 @@ final class Resources
     }
 
     /**
-     * Every machine, including the deactivated ones. For the admin screen.
+     * All equipment, including the deactivated pieces. For the admin screen.
      *
      * @return list<array<string, mixed>>
      */
@@ -54,21 +55,21 @@ final class Resources
     {
         return Db::get()->all(
             'SELECT ' . self::COLUMNS . ',
-                    (SELECT COUNT(*) FROM bookings b WHERE b.resource_id = resources.id) AS booking_count
-               FROM resources
+                    (SELECT COUNT(*) FROM bookings b WHERE b.equipment_id = equipment.id) AS booking_count
+               FROM equipment
               ORDER BY is_active DESC, name'
         );
     }
 
     /**
-     * The machines a member may book, in the order the picker shows them.
+     * The equipment a member may book, in the order the picker shows it.
      *
      * @return list<array<string, mixed>>
      */
     public static function allActive(): array
     {
         return Db::get()->all(
-            'SELECT ' . self::COLUMNS . ' FROM resources WHERE is_active = 1 ORDER BY name'
+            'SELECT ' . self::COLUMNS . ' FROM equipment WHERE is_active = 1 ORDER BY name'
         );
     }
 
@@ -77,7 +78,7 @@ final class Resources
      */
     public static function find(int $id): ?array
     {
-        return Db::get()->one('SELECT ' . self::COLUMNS . ' FROM resources WHERE id = ?', [$id]);
+        return Db::get()->one('SELECT ' . self::COLUMNS . ' FROM equipment WHERE id = ?', [$id]);
     }
 
     /**
@@ -85,15 +86,16 @@ final class Resources
      */
     public static function findBySlug(string $slug): ?array
     {
-        return Db::get()->one('SELECT ' . self::COLUMNS . ' FROM resources WHERE slug = ?', [$slug]);
+        return Db::get()->one('SELECT ' . self::COLUMNS . ' FROM equipment WHERE slug = ?', [$slug]);
     }
 
     /**
-     * The machine the calendar shows: the active one named in the URL, or none.
+     * The piece of equipment the calendar shows: the active one named in the
+     * URL, or none.
      *
      * Nothing is remembered between visits and there is no default: the
-     * calendar starts empty until the member picks a machine, so nobody books
-     * the wrong instrument by accident. An unknown or retired slug - an old
+     * calendar starts empty until the member picks a piece, so nobody books
+     * the wrong equipment by accident. An unknown or retired slug - an old
      * link - also gives none rather than an error.
      *
      * @return array<string, mixed>|null
@@ -110,8 +112,9 @@ final class Resources
     }
 
     /**
-     * The machine a booking write names. Unlike resolve() this refuses anything
-     * it does not recognise: a booking must land on a real, active machine.
+     * The piece of equipment a booking write names. Unlike selected() this
+     * refuses anything it does not recognise: a booking must land on a real,
+     * active piece of equipment.
      */
     public static function requireActive(?string $identifier): array
     {
@@ -124,7 +127,7 @@ final class Resources
                 : self::findBySlug($identifier));
 
         if ($row === null || (int) $row['is_active'] !== 1) {
-            throw HttpException::unprocessable('That machine is not available for booking.');
+            throw HttpException::unprocessable('That equipment is not available for booking.');
         }
 
         return $row;
@@ -135,12 +138,12 @@ final class Resources
         $name = trim($name);
 
         if ($name === '' || mb_strlen($name) > 128) {
-            throw new RuntimeException('A machine needs a name of 1 to 128 characters.');
+            throw new RuntimeException('A piece of equipment needs a name of 1 to 128 characters.');
         }
 
         $description = trim((string) $description);
 
-        $id = Db::get()->insert('resources', [
+        $id = Db::get()->insert('equipment', [
             'name'        => $name,
             'slug'        => self::uniqueSlug($name),
             'description' => $description === '' ? null : $description,
@@ -151,14 +154,14 @@ final class Resources
         $row = self::find($id);
 
         if ($row === null) {
-            throw new RuntimeException('Machine row disappeared immediately after insert.');
+            throw new RuntimeException('Equipment row disappeared immediately after insert.');
         }
 
         return $row;
     }
 
     /**
-     * Rename a machine or change its description. The slug is left alone: it is
+     * Rename a piece of equipment or change its description. The slug is left alone: it is
      * in the addresses people have bookmarked.
      */
     public static function update(int $id, string $name, ?string $description = null): void
@@ -166,12 +169,12 @@ final class Resources
         $name = trim($name);
 
         if ($name === '' || mb_strlen($name) > 128) {
-            throw new RuntimeException('A machine needs a name of 1 to 128 characters.');
+            throw new RuntimeException('A piece of equipment needs a name of 1 to 128 characters.');
         }
 
         $description = trim((string) $description);
 
-        Db::get()->update('resources', [
+        Db::get()->update('equipment', [
             'name'        => $name,
             'description' => $description === '' ? null : $description,
         ], 'id = ?', [$id]);
@@ -179,36 +182,36 @@ final class Resources
 
     public static function setActive(int $id, bool $active): void
     {
-        Db::get()->update('resources', ['is_active' => $active ? 1 : 0], 'id = ?', [$id]);
+        Db::get()->update('equipment', ['is_active' => $active ? 1 : 0], 'id = ?', [$id]);
     }
 
     public static function delete(int $id): void
     {
-        Db::get()->query('DELETE FROM resources WHERE id = ?', [$id]);
+        Db::get()->query('DELETE FROM equipment WHERE id = ?', [$id]);
     }
 
     public static function countBookings(int $id): int
     {
-        return (int) Db::get()->value('SELECT COUNT(*) FROM bookings WHERE resource_id = ?', [$id]);
+        return (int) Db::get()->value('SELECT COUNT(*) FROM bookings WHERE equipment_id = ?', [$id]);
     }
 
     public static function countActive(): int
     {
-        return (int) Db::get()->value('SELECT COUNT(*) FROM resources WHERE is_active = 1');
+        return (int) Db::get()->value('SELECT COUNT(*) FROM equipment WHERE is_active = 1');
     }
 
     /**
-     * Take a row lock on the resource. Every booking write does this first, so
-     * that writes for one machine are serialised and two requests cannot both
-     * find a slot free and then both fill it. Two different machines take two
+     * Take a row lock on the piece of equipment. Every booking write does this
+     * first, so that writes for one piece are serialised and two requests cannot
+     * both find a slot free and then both fill it. Two different pieces take two
      * different locks and do not wait for each other.
      *
      * MySQL has no exclusion constraint for time ranges, and relying on InnoDB
      * gap locks would be subtle; one explicit row lock is easy to verify.
      */
-    public static function lock(int $resourceId): void
+    public static function lock(int $equipmentId): void
     {
-        Db::get()->query('SELECT id FROM resources WHERE id = ? FOR UPDATE', [$resourceId]);
+        Db::get()->query('SELECT id FROM equipment WHERE id = ? FOR UPDATE', [$equipmentId]);
     }
 
     /** A URL-safe slug for a name, with a suffix if that slug is taken. */
@@ -217,7 +220,7 @@ final class Resources
         $base = strtolower(trim((string) preg_replace('/[^A-Za-z0-9]+/', '-', $name), '-'));
 
         if ($base === '') {
-            $base = 'machine';
+            $base = 'equipment';
         }
 
         $base = mb_substr($base, 0, 56);

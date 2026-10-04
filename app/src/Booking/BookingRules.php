@@ -74,7 +74,7 @@ final class BookingRules
         // but occupies none of it.
         $endsAtMidnight = $endMinutes === 0 && (int) $localEnd->format('s') === 0;
 
-        // Every calendar day the booking touches must be one the machine is
+        // Every calendar day the booking touches must be one the equipment is
         // open on. Stepping at local noon keeps the cursor clear of the hour
         // DST adds or removes, so "+1 day" always lands on the next date.
         $cursor = $localStart->setTime(12, 0);
@@ -89,7 +89,7 @@ final class BookingRules
                 continue;
             }
 
-            $errors[] = 'The machine can be booked on ' . self::humanDays($rules->openDays) . '.'
+            $errors[] = 'The equipment can be booked on ' . self::humanDays($rules->openDays) . '.'
                 . ($cursor->format('Y-m-d') === $localStart->format('Y-m-d')
                     ? ''
                     : ' This booking would run through a ' . self::humanDays([(int) $cursor->format('N')]) . '.');
@@ -97,7 +97,7 @@ final class BookingRules
         }
 
         // Only the two ends are held to the clock. A booking that runs for days
-        // holds the machine through the nights in between, and those hours are
+        // holds the equipment through the nights in between, and those hours are
         // occupied by design rather than booked against opening hours.
         $open = $rules->openMinutes();
         $close = $rules->closeMinutes();

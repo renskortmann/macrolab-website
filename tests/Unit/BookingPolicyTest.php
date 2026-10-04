@@ -108,7 +108,7 @@ final class BookingPolicyTest extends TestCase
 
         return new Booking(
             id: 42,
-            resourceId: 1,
+            equipmentId: 1,
             userId: $ownerId,
             startsAt: new DateTimeImmutable('2026-09-14 07:00', $utc),
             endsAt: new DateTimeImmutable('2026-09-14 09:00', $utc),

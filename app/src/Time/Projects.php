@@ -12,7 +12,7 @@ use RuntimeException;
 /**
  * Every query against the `projects` table.
  *
- * Shaped like Resources, with one difference: it returns Project objects rather
+ * Shaped like Booking\Equipment, with one difference: it returns Project objects rather
  * than raw rows, which is the convention everything newer in this codebase
  * follows.
  */

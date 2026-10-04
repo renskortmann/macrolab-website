@@ -13,13 +13,13 @@ use Macrolab\Db;
  */
 final class Bookings
 {
-    private const SELECT = 'SELECT b.id, b.resource_id, b.user_id, b.starts_at, b.ends_at,
+    private const SELECT = 'SELECT b.id, b.equipment_id, b.user_id, b.starts_at, b.ends_at,
                                    b.purpose, b.status, b.created_by_admin,
                                    u.netid AS owner_netid, u.display_name AS owner_name,
-                                   r.name AS resource_name
+                                   e.name AS equipment_name
                               FROM bookings b
                               JOIN users u ON u.id = b.user_id
-                              JOIN resources r ON r.id = b.resource_id';
+                              JOIN equipment e ON e.id = b.equipment_id';
 
     public static function find(int $id): ?Booking
     {
@@ -33,15 +33,15 @@ final class Bookings
      *
      * @return list<Booking>
      */
-    public static function inWindow(int $resourceId, DateTimeImmutable $from, DateTimeImmutable $to): array
+    public static function inWindow(int $equipmentId, DateTimeImmutable $from, DateTimeImmutable $to): array
     {
         $rows = Db::get()->all(
-            self::SELECT . ' WHERE b.resource_id = ?
+            self::SELECT . ' WHERE b.equipment_id = ?
                                AND b.status = "confirmed"
                                AND b.starts_at < ?
                                AND b.ends_at > ?
                           ORDER BY b.starts_at',
-            [$resourceId, Clock::sql($to), Clock::sql($from)]
+            [$equipmentId, Clock::sql($to), Clock::sql($from)]
         );
 
         return array_map([Booking::class, 'fromRow'], $rows);
@@ -64,19 +64,19 @@ final class Bookings
     }
 
     /**
-     * Bookings for the admin management screen, newest first. A null resource
-     * id means every machine.
+     * Bookings for the admin management screen, newest first. A null equipment
+     * id means all equipment.
      *
      * @return list<Booking>
      */
-    public static function recent(?int $resourceId, int $limit = 200, bool $includeCancelled = false): array
+    public static function recent(?int $equipmentId, int $limit = 200, bool $includeCancelled = false): array
     {
         $sql = self::SELECT . ' WHERE 1 = 1';
         $params = [];
 
-        if ($resourceId !== null) {
-            $sql .= ' AND b.resource_id = ?';
-            $params[] = $resourceId;
+        if ($equipmentId !== null) {
+            $sql .= ' AND b.equipment_id = ?';
+            $params[] = $equipmentId;
         }
 
         if (!$includeCancelled) {
@@ -89,18 +89,19 @@ final class Bookings
     }
 
     /**
-     * How many upcoming confirmed bookings a user holds on one machine, for the
-     * quota check. The quota is per machine: filling up one instrument does not
+     * How many upcoming confirmed bookings a user holds on one piece of
+     * equipment, for the quota check. The quota is per piece of equipment:
+     * filling up one does not
      * lock somebody out of the others.
      */
     public static function countUpcomingForUser(
         int $userId,
-        int $resourceId,
+        int $equipmentId,
         ?int $excludeBookingId = null,
     ): int {
         $sql = 'SELECT COUNT(*) FROM bookings
-                 WHERE user_id = ? AND resource_id = ? AND status = "confirmed" AND ends_at > ?';
-        $params = [$userId, $resourceId, Clock::sql()];
+                 WHERE user_id = ? AND equipment_id = ? AND status = "confirmed" AND ends_at > ?';
+        $params = [$userId, $equipmentId, Clock::sql()];
 
         if ($excludeBookingId !== null) {
             $sql .= ' AND id <> ?';
@@ -113,21 +114,21 @@ final class Bookings
     /**
      * A confirmed booking overlapping the given interval, if there is one.
      *
-     * Must be called inside the transaction that holds the resource lock; on
+     * Must be called inside the transaction that holds the equipment lock; on
      * its own it is only a hint, because another request could insert a
      * conflicting row a moment later.
      */
     public static function findOverlap(
-        int $resourceId,
+        int $equipmentId,
         DateTimeImmutable $start,
         DateTimeImmutable $end,
         ?int $excludeBookingId = null,
     ): ?Booking {
-        $sql = self::SELECT . ' WHERE b.resource_id = ?
+        $sql = self::SELECT . ' WHERE b.equipment_id = ?
                                   AND b.status = "confirmed"
                                   AND b.starts_at < ?
                                   AND b.ends_at > ?';
-        $params = [$resourceId, Clock::sql($end), Clock::sql($start)];
+        $params = [$equipmentId, Clock::sql($end), Clock::sql($start)];
 
         if ($excludeBookingId !== null) {
             $sql .= ' AND b.id <> ?';

@@ -18,7 +18,7 @@ use Macrolab\Actor;
 use Macrolab\Booking\BookingException;
 use Macrolab\Config;
 use Macrolab\Db;
-use Macrolab\Booking\Resources;
+use Macrolab\Booking\Equipment;
 use Macrolab\Users;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -41,7 +41,7 @@ $end = new DateTimeImmutable('2026-09-14 10:00:00', new DateTimeZone('UTC'));
 try {
     $booking = \Macrolab\Booking\BookingService::create(
         Actor::forAdmin(),      // the admin path skips the rule checks, not the overlap check
-        Resources::primaryId(),
+        Equipment::primaryId(),
         $start,
         $end,
         'concurrency probe',

@@ -17,14 +17,14 @@ use Macrolab\Http\HttpException;
  *
  * The administrator bypasses the booking rules entirely - they may book the
  * past, exceed the quota and work outside opening hours - but never the
- * overlap check, because two reservations on one machine at one time is not a
+ * overlap check, because two reservations on one piece of equipment at one time is not a
  * policy question.
  */
 final class BookingService
 {
     public static function create(
         Actor $actor,
-        int $resourceId,
+        int $equipmentId,
         DateTimeImmutable $startUtc,
         DateTimeImmutable $endUtc,
         ?string $purpose = null,
@@ -38,7 +38,7 @@ final class BookingService
         }
 
         if (!$actor->isAdmin) {
-            self::assertRules($actor, $startUtc, $endUtc, null, $userId, $resourceId);
+            self::assertRules($actor, $startUtc, $endUtc, null, $userId, $equipmentId);
         } else {
             self::assertSane($startUtc, $endUtc);
         }
@@ -46,17 +46,17 @@ final class BookingService
         $purpose = self::normalisePurpose($purpose);
 
         return Db::get()->transaction(static function () use (
-            $resourceId, $userId, $startUtc, $endUtc, $purpose, $actor
+            $equipmentId, $userId, $startUtc, $endUtc, $purpose, $actor
         ): Booking {
-            Resources::lock($resourceId);
+            Equipment::lock($equipmentId);
 
-            if (Bookings::findOverlap($resourceId, $startUtc, $endUtc) !== null) {
+            if (Bookings::findOverlap($equipmentId, $startUtc, $endUtc) !== null) {
                 throw BookingException::slotTaken();
             }
 
             $now = Clock::sql();
             $id = Db::get()->insert('bookings', [
-                'resource_id'      => $resourceId,
+                'equipment_id'      => $equipmentId,
                 'user_id'          => $userId,
                 'starts_at'        => Clock::sql($startUtc),
                 'ends_at'          => Clock::sql($endUtc),
@@ -103,7 +103,7 @@ final class BookingService
                 throw BookingException::invalid([$error]);
             }
 
-            self::assertRules($actor, $startUtc, $endUtc, $booking->id, $booking->userId, $booking->resourceId);
+            self::assertRules($actor, $startUtc, $endUtc, $booking->id, $booking->userId, $booking->equipmentId);
         } else {
             self::assertSane($startUtc, $endUtc);
         }
@@ -111,9 +111,9 @@ final class BookingService
         $purpose = self::normalisePurpose($purpose);
 
         return Db::get()->transaction(static function () use ($booking, $startUtc, $endUtc, $purpose): Booking {
-            Resources::lock($booking->resourceId);
+            Equipment::lock($booking->equipmentId);
 
-            if (Bookings::findOverlap($booking->resourceId, $startUtc, $endUtc, $booking->id) !== null) {
+            if (Bookings::findOverlap($booking->equipmentId, $startUtc, $endUtc, $booking->id) !== null) {
                 throw BookingException::slotTaken();
             }
 
@@ -141,7 +141,7 @@ final class BookingService
 
     /**
      * Cancel a booking. The row is kept with status 'cancelled' so the audit
-     * trail still explains who had the machine and what happened.
+     * trail still explains who had the equipment and what happened.
      */
     public static function cancel(Actor $actor, Booking $booking): void
     {
@@ -198,10 +198,10 @@ final class BookingService
         DateTimeImmutable $endUtc,
         ?int $excludeBookingId,
         int $ownerUserId,
-        int $resourceId,
+        int $equipmentId,
     ): void {
         $rules = RuleSet::fromSettings();
-        $activeCount = Bookings::countUpcomingForUser($ownerUserId, $resourceId, $excludeBookingId);
+        $activeCount = Bookings::countUpcomingForUser($ownerUserId, $equipmentId, $excludeBookingId);
 
         $errors = BookingRules::validate(
             rules: $rules,

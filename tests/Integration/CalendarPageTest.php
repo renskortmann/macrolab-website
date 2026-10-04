@@ -6,14 +6,14 @@ namespace Macrolab\Tests\Integration;
 
 use Macrolab\Auth;
 use Macrolab\Auth\Identity;
-use Macrolab\Booking\Resources;
+use Macrolab\Booking\Equipment;
 use Macrolab\Controller\CalendarController;
 use Macrolab\Http\Request;
 use Macrolab\Http\Response;
 use Macrolab\Users;
 
 /**
- * /booking starts with no machine: an empty, read-only calendar until the
+ * /booking starts with no equipment: an empty, read-only calendar until the
  * member picks one. Nothing is remembered between visits.
  */
 final class CalendarPageTest extends DatabaseTestCase
@@ -26,47 +26,53 @@ final class CalendarPageTest extends DatabaseTestCase
         Auth::signIn(new Identity(netid: 'kim', method: 'test'));
     }
 
-    public function testPlainBookingShowsNoMachine(): void
+    public function testPlainBookingShowsNoEquipment(): void
     {
         $response = $this->show();
 
         self::assertSame(200, $response->status);
-        self::assertStringContainsString('Choose a machine', $response->body);
-        self::assertSame(null, $this->config($response)['resourceId']);
+        self::assertStringContainsString('Choose equipment', $response->body);
+        self::assertSame(null, $this->config($response)['equipmentId']);
     }
 
-    public function testANamedMachineIsShown(): void
+    public function testNamedEquipmentIsShown(): void
     {
-        $machine = Resources::primary();
+        $piece = Equipment::primary();
 
-        $response = $this->show(['machine' => $machine['slug']]);
+        $response = $this->show(['equipment' => $piece['slug']]);
 
-        self::assertStringContainsString((string) $machine['name'], $response->body);
-        self::assertSame((int) $machine['id'], $this->config($response)['resourceId']);
+        self::assertStringContainsString((string) $piece['name'], $response->body);
+        self::assertSame((int) $piece['id'], $this->config($response)['equipmentId']);
 
-        // The booking dialog names the machine and whom the booking is for.
+        // The booking dialog names the equipment and whom the booking is for.
         self::assertMatchesRegularExpression(
-            '#<dt>Machine</dt>\s*<dd>' . preg_quote((string) $machine['name'], '#') . '</dd>#',
+            '#<dt>Equipment</dt>\s*<dd>' . preg_quote((string) $piece['name'], '#') . '</dd>#',
             $response->body
         );
         self::assertSame('kim', $this->config($response)['userLabel']);
     }
 
-    public function testTheChoiceIsNotRememberedForTheNextVisit(): void
+    public function testTheOldMachineParameterNoLongerSelectsAnything(): void
     {
-        $this->show(['machine' => Resources::primary()['slug']]);
-
-        self::assertSame(null, $this->config($this->show())['resourceId']);
+        // ?machine= was dropped when the app switched to "equipment".
+        self::assertSame(null, $this->config($this->show(['machine' => Equipment::primary()['slug']]))['equipmentId']);
     }
 
-    public function testAnUnknownOrRetiredMachineShowsNoMachine(): void
+    public function testTheChoiceIsNotRememberedForTheNextVisit(): void
     {
-        self::assertSame(null, $this->config($this->show(['machine' => 'no-such-machine']))['resourceId']);
+        $this->show(['equipment' => Equipment::primary()['slug']]);
 
-        $retired = Resources::create('Old microscope');
-        Resources::setActive((int) $retired['id'], false);
+        self::assertSame(null, $this->config($this->show())['equipmentId']);
+    }
 
-        self::assertSame(null, $this->config($this->show(['machine' => $retired['slug']]))['resourceId']);
+    public function testUnknownOrRetiredEquipmentShowsNone(): void
+    {
+        self::assertSame(null, $this->config($this->show(['equipment' => 'no-such-equipment']))['equipmentId']);
+
+        $retired = Equipment::create('Old microscope');
+        Equipment::setActive((int) $retired['id'], false);
+
+        self::assertSame(null, $this->config($this->show(['equipment' => $retired['slug']]))['equipmentId']);
     }
 
     /** @param array<string, string> $query */

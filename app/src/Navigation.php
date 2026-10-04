@@ -36,7 +36,7 @@ final class Navigation
                 [
                     'href'  => '/booking',
                     'label' => 'Booking',
-                    'blurb' => 'The shared calendar for the lab instruments.',
+                    'blurb' => 'The shared calendar for the lab equipment.',
                 ],
                 [
                     'href'  => '/admin/time',
@@ -46,17 +46,17 @@ final class Navigation
                 [
                     'href'  => '/admin',
                     'label' => 'Administration',
-                    'blurb' => 'People, machines, activities, rules and the audit log.',
+                    'blurb' => 'People, equipment, activities, rules and the audit log.',
                 ],
             ];
         }
 
-        // Every member books machines; the role adds the time pages. A lab user
+        // Every member books equipment; the role adds the time pages. A lab user
         // is not shown time registration at all (and is refused at /time).
         $destinations = [[
             'href'  => '/booking',
             'label' => 'Booking',
-            'blurb' => 'Book time on a lab instrument, and change or cancel your own bookings.',
+            'blurb' => 'Book time on lab equipment, and change or cancel your own bookings.',
         ]];
 
         if ($actor->canRegisterTime()) {

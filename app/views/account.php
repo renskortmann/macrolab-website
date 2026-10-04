@@ -28,7 +28,7 @@ use Macrolab\Csrf;
     <?php else: ?>
         <table>
             <thead>
-            <tr><th>Date</th><th>Time</th><th>Machine</th><th>Purpose</th></tr>
+            <tr><th>Date</th><th>Time</th><th>Equipment</th><th>Purpose</th></tr>
             </thead>
             <tbody>
             <?php foreach ($bookings as $booking): ?>
@@ -37,7 +37,7 @@ use Macrolab\Csrf;
                     <td>
                         <?= e(Clock::local($booking->startsAt, 'H:i')) ?>-<?= e(Clock::local($booking->endsAt, 'H:i')) ?>
                     </td>
-                    <td><?= e($booking->resourceName ?? '-') ?></td>
+                    <td><?= e($booking->equipmentName ?? '-') ?></td>
                     <td><?= e($booking->purpose ?? '-') ?></td>
                 </tr>
             <?php endforeach; ?>

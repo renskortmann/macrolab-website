@@ -13,7 +13,7 @@ use Macrolab\Booking\BookingService;
 use Macrolab\Booking\Bookings;
 use Macrolab\Clock;
 use Macrolab\Http\HttpException;
-use Macrolab\Booking\Resources;
+use Macrolab\Booking\Equipment;
 use Macrolab\Settings;
 use Macrolab\User;
 use Macrolab\Users;
@@ -26,7 +26,7 @@ final class BookingServiceTest extends DatabaseTestCase
 {
     private User $alice;
     private User $bob;
-    private int $resourceId;
+    private int $equipmentId;
 
     protected function setUp(): void
     {
@@ -34,7 +34,7 @@ final class BookingServiceTest extends DatabaseTestCase
 
         $this->alice = Users::create('alice', 'Alice');
         $this->bob = Users::create('bob', 'Bob');
-        $this->resourceId = Resources::primaryId();
+        $this->equipmentId = Equipment::primaryId();
 
         // A fixed "now": Monday 14 September 2026, 06:00 UTC - which is 08:00
         // local, so the 11:00-and-later bookings below are comfortably in the
@@ -95,7 +95,7 @@ final class BookingServiceTest extends DatabaseTestCase
 
         self::assertNotSame($first->id, $second->id);
         self::assertCount(2, Bookings::inWindow(
-            $this->resourceId,
+            $this->equipmentId,
             $this->utc('2026-09-14 00:00'),
             $this->utc('2026-09-15 00:00'),
         ));
@@ -202,7 +202,7 @@ final class BookingServiceTest extends DatabaseTestCase
     {
         $booking = BookingService::create(
             Actor::forAdmin(),
-            $this->resourceId,
+            $this->equipmentId,
             $this->local('11:00'),
             $this->local('12:00'),
             'training',
@@ -220,7 +220,7 @@ final class BookingServiceTest extends DatabaseTestCase
         // 05:00 local on a Sunday, in the past, and eight hours long.
         $booking = BookingService::create(
             Actor::forAdmin(),
-            $this->resourceId,
+            $this->equipmentId,
             $this->utc('2026-09-06 03:00'),
             $this->utc('2026-09-06 11:00'),
             'maintenance',
@@ -230,12 +230,12 @@ final class BookingServiceTest extends DatabaseTestCase
         self::assertTrue($booking->isConfirmed());
     }
 
-    public function testEvenTheAdminCannotDoubleBookTheMachine(): void
+    public function testEvenTheAdminCannotDoubleBookTheEquipment(): void
     {
         $this->book($this->alice, '11:00', '12:00');
 
         $this->expectException(BookingException::class);
-        BookingService::create(Actor::forAdmin(), $this->resourceId,
+        BookingService::create(Actor::forAdmin(), $this->equipmentId,
             $this->local('11:30'), $this->local('12:30'), null, $this->bob->id);
     }
 
@@ -268,7 +268,7 @@ final class BookingServiceTest extends DatabaseTestCase
     {
         Settings::set('min_change_notice_minutes', '60');
 
-        $booking = BookingService::create(Actor::forAdmin(), $this->resourceId,
+        $booking = BookingService::create(Actor::forAdmin(), $this->equipmentId,
             $this->local('08:30'), $this->local('09:30'), null, $this->alice->id);
 
         // "Now" is 08:00 local, so the booking starts in 30 minutes - inside
@@ -284,7 +284,7 @@ final class BookingServiceTest extends DatabaseTestCase
     public function testTheAdminCanStillChangeABookingThatHasStarted(): void
     {
         // 07:00 local: an hour before the frozen "now", so it is under way.
-        $booking = BookingService::create(Actor::forAdmin(), $this->resourceId,
+        $booking = BookingService::create(Actor::forAdmin(), $this->equipmentId,
             $this->local('07:00'), $this->local('09:00'), null, $this->alice->id);
 
         BookingService::cancel(Actor::forAdmin(), $booking);
@@ -298,7 +298,7 @@ final class BookingServiceTest extends DatabaseTestCase
     {
         return BookingService::create(
             Actor::forUser($user),
-            $this->resourceId,
+            $this->equipmentId,
             $this->local($fromLocal),
             $this->local($toLocal),
             'test run',

@@ -19,7 +19,7 @@ members can sign in with their netID.
 | | |
 |---|---|
 | Name | Macrolab website |
-| Purpose | Reserving time on the lab instruments in `<faculty / department / lab>`, and time registration for its lab technicians |
+| Purpose | Reserving time on the lab equipment in `<faculty / department / lab>`, and time registration for its lab technicians |
 | URL | `https://macrolab.citg.tudelft.nl/` |
 | Owner / contact | `<name>`, `<email>`, `<phone>` |
 | Hosted on | TU Delft LAMP hosting (Plesk), `<server or hosting request reference>` |

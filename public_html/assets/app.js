@@ -95,11 +95,11 @@
         var feedUrl = el.dataset.feed;
         var csrf = el.dataset.csrf;
 
-        /* No machine picked yet: an empty, read-only calendar that points to
+        /* No equipment picked yet: an empty, read-only calendar that points to
            the picker when someone tries to book. */
-        var hasMachine = cfg.resourceId !== null;
+        var hasEquipment = cfg.equipmentId !== null;
         var noticeEl = document.getElementById('calendar-notice');
-        var machineEl = document.getElementById('machine');
+        var equipmentEl = document.getElementById('equipment');
         var noticeTimer = null;
 
         var dialog = document.getElementById('booking-dialog');
@@ -177,7 +177,7 @@
                 startTime: cfg.openTime,
                 endTime: cfg.closeTime
             },
-            /* Admins may need days the machine is normally closed; everyone
+            /* Admins may need days the equipment is normally closed; everyone
                else is only shown the days they can actually book. */
             hiddenDays: cfg.isAdmin ? [] : hiddenDays(cfg.openDays),
             headerToolbar: {
@@ -202,12 +202,12 @@
             listDayFormat: function (arg) {
                 return arg.date.day + ' ' + MONTHS[arg.date.month] + ' ' + arg.date.year;
             },
-            events: hasMachine ? loadEvents : [],
+            events: hasEquipment ? loadEvents : [],
             select: function (info) {
                 calendar.unselect();
-                if (!hasMachine) {
-                    notice('Please choose a machine first, then pick a time.');
-                    if (machineEl) { machineEl.focus(); }
+                if (!hasEquipment) {
+                    notice('Please choose the equipment first, then pick a time.');
+                    if (equipmentEl) { equipmentEl.focus(); }
                     return;
                 }
                 openCreate(info.start, info.end);
@@ -235,7 +235,7 @@
         /* ------------------------------------------------------------ data */
 
         function loadEvents(info, success, failure) {
-            var url = feedUrl + '?resource=' + encodeURIComponent(cfg.resourceId) +
+            var url = feedUrl + '?equipment=' + encodeURIComponent(cfg.equipmentId) +
                 '&from=' + encodeURIComponent(info.startStr) +
                 '&to=' + encodeURIComponent(info.endStr);
 
@@ -265,7 +265,7 @@
 
         function openCreate(startsAt, endsAt) {
             editing = null;
-            titleEl.textContent = 'Book the machine';
+            titleEl.textContent = 'Book the equipment';
             start.set(startsAt);
             end.set(endsAt);
             purposeEl.value = '';
@@ -283,7 +283,7 @@
             var props = event.extendedProps || {};
 
             if (!props.canModify) {
-                /* Someone else's booking: show who has the machine, nothing more. */
+                /* Someone else's booking: show who has the equipment, nothing more. */
                 editing = null;
                 titleEl.textContent = 'Booked';
                 forEl.textContent = ownerText(props);
@@ -357,7 +357,7 @@
             }
 
             var payload = {
-                resource: cfg.resourceId,
+                equipment: cfg.equipmentId,
                 start: start.value(),
                 end: end.value(),
                 purpose: purposeEl.value

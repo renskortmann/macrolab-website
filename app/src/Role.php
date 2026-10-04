@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Macrolab;
 
 /**
- * What a member may use. Every member can book machines; the role adds time
+ * What a member may use. Every member can book equipment; the role adds time
  * registration and the overview of everyone's time.
  *
  * The administrator is not a member and has no role: their rights come from

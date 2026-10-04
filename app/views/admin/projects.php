@@ -14,7 +14,7 @@ use Macrolab\Time\TimeRules;
         Technicians log their time against these activities under the general
         lab code: maintaining equipment, supporting teaching, tidying up the
         lab, and so on. Every time entry belongs to one activity. This list
-        has nothing to do with the machines: time is logged against work, not
+        has nothing to do with the equipment: time is logged against work, not
         against equipment.
     </p>
 

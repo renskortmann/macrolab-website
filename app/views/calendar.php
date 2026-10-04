@@ -4,8 +4,8 @@
  * it needs is handed over in a data attribute, because the content security
  * policy allows no inline script.
  *
- * @var array<string, mixed>|null  $resource     null until a machine is picked
- * @var list<array<string, mixed>> $machines
+ * @var array<string, mixed>|null  $equipment     null until a piece is picked
+ * @var list<array<string, mixed>> $equipmentList
  * @var \Macrolab\Actor            $actor
  * @var \Macrolab\Booking\RuleSet  $rules
  * @var string                     $csrf
@@ -18,30 +18,30 @@ use Macrolab\Clock;
 <section class="card">
     <div class="calendar-head">
         <div>
-            <h1><?= e($resource === null ? 'Booking' : $resource['name']) ?></h1>
-            <?php if ($resource !== null && !empty($resource['description'])): ?>
-                <p class="muted"><?= e($resource['description']) ?></p>
+            <h1><?= e($equipment === null ? 'Booking' : $equipment['name']) ?></h1>
+            <?php if ($equipment !== null && !empty($equipment['description'])): ?>
+                <p class="muted"><?= e($equipment['description']) ?></p>
             <?php endif; ?>
 
-            <?php /* Always shown, even for one machine: nothing is preselected. */ ?>
-            <form method="get" action="<?= e(path('/booking')) ?>" class="machine-picker">
-                <label for="machine">Machine</label>
-                <select id="machine" name="machine" data-auto-submit>
-                    <?php if ($resource === null): ?>
-                        <option value="" selected disabled>Choose a machine&hellip;</option>
+            <?php /* Always shown, even for a single piece: nothing is preselected. */ ?>
+            <form method="get" action="<?= e(path('/booking')) ?>" class="equipment-picker">
+                <label for="equipment">Equipment</label>
+                <select id="equipment" name="equipment" data-auto-submit>
+                    <?php if ($equipment === null): ?>
+                        <option value="" selected disabled>Choose equipment&hellip;</option>
                     <?php endif; ?>
-                    <?php foreach ($machines as $machine): ?>
-                        <option value="<?= e($machine['slug']) ?>"
-                            <?= $resource !== null && $machine['slug'] === $resource['slug'] ? 'selected' : '' ?>>
-                            <?= e($machine['name']) ?>
+                    <?php foreach ($equipmentList as $piece): ?>
+                        <option value="<?= e($piece['slug']) ?>"
+                            <?= $equipment !== null && $piece['slug'] === $equipment['slug'] ? 'selected' : '' ?>>
+                            <?= e($piece['name']) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
                 <button type="submit">Show</button>
             </form>
 
-            <?php if ($resource === null): ?>
-                <p class="muted small">Choose a machine to see and make bookings.</p>
+            <?php if ($equipment === null): ?>
+                <p class="muted small">Choose a piece of equipment to see and make bookings.</p>
             <?php endif; ?>
         </div>
 
@@ -62,7 +62,7 @@ use Macrolab\Clock;
             up to <?= e(Clock::humanDuration($rules->maxMinutes)) ?> at a time,
             <?= e($rules->maxAdvanceDays) ?> days ahead,
             <?= $rules->maxActivePerUser > 0
-                ? 'at most ' . e($rules->maxActivePerUser) . ' upcoming booking(s) each on this machine'
+                ? 'at most ' . e($rules->maxActivePerUser) . ' upcoming booking(s) each on this equipment'
                 : 'with no limit on how many you may hold' ?>.
         <?php endif; ?>
     </p>
@@ -79,13 +79,13 @@ use Macrolab\Clock;
 
 <dialog id="booking-dialog">
     <form id="booking-form" method="dialog">
-        <h2 id="booking-dialog-title">Book the machine</h2>
+        <h2 id="booking-dialog-title">Book the equipment</h2>
 
         <p id="booking-dialog-error" class="alert" hidden role="alert"></p>
 
         <dl class="facts">
-            <dt>Machine</dt>
-            <dd><?= e($resource === null ? '' : $resource['name']) ?></dd>
+            <dt>Equipment</dt>
+            <dd><?= e($equipment === null ? '' : $equipment['name']) ?></dd>
             <dt>Booked for</dt>
             <dd id="booking-dialog-for"></dd>
         </dl>

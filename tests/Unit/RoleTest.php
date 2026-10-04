@@ -10,7 +10,7 @@ use Macrolab\User;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Who may use what. Every member books machines; the role adds the time pages.
+ * Who may use what. Every member books equipment; the role adds the time pages.
  */
 final class RoleTest extends TestCase
 {

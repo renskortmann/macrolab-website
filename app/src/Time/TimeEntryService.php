@@ -20,7 +20,7 @@ use RuntimeException;
  * Note what is absent. There is no row lock, because unlike a booking there is
  * nothing here two requests can both claim. The per-day cap is advisory, and a
  * race that lets somebody log sixteen hours and five minutes is harmless.
- * Copying Resources::lock() would be borrowing a mechanism whose reason does
+ * Copying Equipment::lock() would be borrowing a mechanism whose reason does
  * not apply.
  */
 final class TimeEntryService

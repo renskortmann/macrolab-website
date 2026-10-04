@@ -28,13 +28,13 @@ final class Settings
         // everything downstream works in. See RuleSet::fromSettings().
         'max_booking_days'             => '1',
         'max_advance_days'             => '60',
-        // 0 means no quota. The limit counts per machine, not in total.
+        // 0 means no quota. The limit counts per piece of equipment, not in total.
         'max_active_bookings_per_user' => '0',
         'min_change_notice_minutes'    => '60',
         'allow_booking_in_past'        => '0',
 
         // Time registration. Unrelated to the booking rules above: these govern
-        // the hours employees log, which have nothing to do with the machines.
+        // the hours employees log, which have nothing to do with the equipment.
         'time_min_entry_minutes' => '5',
         'time_max_entry_minutes' => '720',   // 12 hours in one entry
         'time_max_day_minutes'   => '960',   // 16 hours across a whole day
@@ -81,7 +81,7 @@ final class Settings
     }
 
     /**
-     * Days of the week the machine may be booked on, as ISO-8601 numbers.
+     * Days of the week the equipment may be booked on, as ISO-8601 numbers.
      *
      * @return list<int>
      */

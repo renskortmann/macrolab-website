@@ -13,7 +13,7 @@ user's password manager.
 ## Project in one paragraph
 
 PHP 8.2+ / MySQL app for the TU Delft Macrolab with two independent systems
-behind one sign-in and a hub at `/`: instrument booking at `/booking`, and time
+behind one sign-in and a hub at `/`: equipment booking at `/booking`, and time
 registration at `/time`, where lab technicians log hours per activity
 (maintenance, teaching support, tidying the lab, ...) so lab management can see
 how their time is spent. The activities are called "projects" in the code. No
@@ -237,11 +237,30 @@ To do:
 6. ~~`httpdocs/`~~ - Plesk's original document root, deleted 2026-10-04
    (Let's Encrypt uses `public_html/.well-known/`). Keep
    `public_html/.well-known/` and Plesk's `public_html/cgi-bin/`.
-7. ~~First real use~~ - 2026-10-04: activities and machines added in the
+7. ~~First real use~~ - 2026-10-04: activities and equipment added in the
    admin views; as a member, bookings made and cancelled, time entries made,
    changed and deleted. All of it appears in the admin views and the audit
    log, and the firewall did not interfere.
-8. Next time: backups (ask ICT about server-level backups first; see item 3).
+8. ~~Member roles~~ - live 2026-10-04: lab user (booking only), lab
+   technician (+ own time registration), lab manager (+ everyone's time at
+   `/time/overview`, with CSV). Migration `004_user_roles.sql` applied from
+   Administration -> System; existing accounts became lab technician. Tested
+   on the live site: a lab user can book equipment, sees no time registration
+   in the hub or top bar, and is refused at `/time`; a lab technician can
+   register time but is not shown the time overview; a lab manager downloaded
+   the time CSV.
+9. **"Equipment" rename (pending deploy):** "machine"/"instrument"/"resource"
+   became "equipment" ("piece of equipment" for one) in the UI, docs, code
+   (`Booking\Equipment`, `equipmentId`, API field `equipment`) and database
+   (migration `005_equipment.sql`: table `equipment`, `bookings.equipment_id`,
+   audit actions `equipment_*`). Old addresses `/admin/machines` and
+   `/booking?machine=` were dropped on purpose. Deploy: export the database
+   first; Pull + Deploy; PHP Composer **Install** (class renamed); then sign in
+   at `/admin/login` and go straight to `/admin/system` (the dashboard fails
+   until the migration runs) and apply the migration.
+10. Next time: backups (ask ICT about server-level backups first; see item 3).
+   Until then, export the database from phpMyAdmin before each release that
+   brings a migration.
 
 ## Updates after go-live
 

@@ -16,7 +16,7 @@ use Macrolab\Role;
     <p class="muted small">
         This list is the access control. A netID that is not here cannot sign
         in - by password today, and by TU Delft SSO later. The role decides what
-        a person may use: every role books machines, a <em>lab technician</em>
+        a person may use: every role books equipment, a <em>lab technician</em>
         also registers their own time, and a <em>lab manager</em> also sees and
         exports everyone's time.
     </p>

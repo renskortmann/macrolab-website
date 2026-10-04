@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Macrolab\Time;
 
 /**
- * Something time is booked against. Deliberately unrelated to a machine: the
+ * Something time is booked against. Deliberately unrelated to equipment: the
  * time registration system does not know the booking system exists.
  */
 final class Project

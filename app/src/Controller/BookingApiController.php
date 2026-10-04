@@ -18,7 +18,7 @@ use Macrolab\Csrf;
 use Macrolab\Http\HttpException;
 use Macrolab\Http\Request;
 use Macrolab\Http\Response;
-use Macrolab\Booking\Resources;
+use Macrolab\Booking\Equipment;
 use Macrolab\Users;
 
 /**
@@ -30,11 +30,11 @@ use Macrolab\Users;
  */
 final class BookingApiController
 {
-    /** GET /api/bookings?resource=&from=&to= - the calendar feed. */
+    /** GET /api/bookings?equipment=&from=&to= - the calendar feed. */
     public function feed(Request $request): Response
     {
         $actor = Auth::requireActor();
-        $resource = Resources::requireActive($request->query('resource'));
+        $equipment = Equipment::requireActive($request->query('equipment'));
 
         $from = Clock::parseInstant($request->query('from', '') ?? '')
             ?? Clock::now()->modify('-1 week');
@@ -50,7 +50,7 @@ final class BookingApiController
             $to = $from->modify('+400 days');
         }
 
-        $bookings = Bookings::inWindow((int) $resource['id'], $from, $to);
+        $bookings = Bookings::inWindow((int) $equipment['id'], $from, $to);
 
         return Response::json(array_map(
             static fn (Booking $b): array => self::toEvent($b, $actor),
@@ -64,13 +64,13 @@ final class BookingApiController
         $actor = Auth::requireActor();
         Csrf::verify($request);
 
-        $resource = Resources::requireActive($request->post('resource'));
+        $equipment = Equipment::requireActive($request->post('equipment'));
         [$start, $end] = $this->readInterval($request);
 
         try {
             $booking = BookingService::create(
                 actor: $actor,
-                resourceId: (int) $resource['id'],
+                equipmentId: (int) $equipment['id'],
                 startUtc: $start,
                 endUtc: $end,
                 purpose: $request->post('purpose'),
@@ -185,7 +185,7 @@ final class BookingApiController
     /**
      * A booking as the calendar needs it.
      *
-     * Other people's bookings show who holds the machine - that is the point of
+     * Other people's bookings show who holds the equipment - that is the point of
      * a shared calendar - but never their stated purpose.
      *
      * @return array<string, mixed>

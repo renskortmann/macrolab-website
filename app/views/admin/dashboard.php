@@ -1,7 +1,7 @@
 <?php
 /**
- * @var list<array<string, mixed>>      $machines
- * @var int                             $machineCount
+ * @var list<array<string, mixed>>      $equipmentList
+ * @var int                             $equipmentCount
  * @var list<\Macrolab\Booking\Booking> $upcoming
  * @var int                             $userCount
  * @var int                             $suspended
@@ -18,7 +18,7 @@ use Macrolab\Clock;
 
     <nav class="admin-nav">
         <a href="<?= e(path('/admin/users')) ?>">Who may sign in</a>
-        <a href="<?= e(path('/admin/machines')) ?>">Machines</a>
+        <a href="<?= e(path('/admin/equipment')) ?>">Equipment</a>
         <a href="<?= e(path('/admin/bookings')) ?>">All bookings</a>
         <a href="<?= e(path('/admin/projects')) ?>">Activities</a>
         <a href="<?= e(path('/admin/time')) ?>">Time overview</a>
@@ -32,11 +32,11 @@ use Macrolab\Clock;
     <h2>At a glance</h2>
 
     <dl class="facts">
-        <dt>Machines in use</dt>
+        <dt>Equipment in use</dt>
         <dd>
-            <?= e($machineCount) ?>
+            <?= e($equipmentCount) ?>
             <span class="muted">
-                - <?= e(implode(', ', array_column($machines, 'name'))) ?>
+                - <?= e(implode(', ', array_column($equipmentList, 'name'))) ?>
             </span>
         </dd>
         <dt>People on the allowlist</dt>
@@ -75,14 +75,14 @@ use Macrolab\Clock;
     <?php else: ?>
         <table>
             <thead>
-            <tr><th>Date</th><th>Time</th><th>Machine</th><th>Who</th><th>Purpose</th></tr>
+            <tr><th>Date</th><th>Time</th><th>Equipment</th><th>Who</th><th>Purpose</th></tr>
             </thead>
             <tbody>
             <?php foreach ($upcoming as $booking): ?>
                 <tr>
                     <td><?= e(Clock::local($booking->startsAt, 'D j M')) ?></td>
                     <td><?= e(Clock::local($booking->startsAt, 'H:i')) ?>-<?= e(Clock::local($booking->endsAt, 'H:i')) ?></td>
-                    <td><?= e($booking->resourceName ?? '-') ?></td>
+                    <td><?= e($booking->equipmentName ?? '-') ?></td>
                     <td><?= e($booking->ownerLabel()) ?> <span class="muted">(<?= e($booking->ownerNetid) ?>)</span></td>
                     <td><?= e($booking->purpose ?? '-') ?></td>
                 </tr>

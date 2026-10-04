@@ -1,6 +1,6 @@
 {
     "name": "tudelft/macrolab-website",
-    "description": "Lab instrument booking and time registration for the Macrolab, for deployment on a TU Delft LAMP server.",
+    "description": "Lab equipment booking and time registration for the Macrolab, for deployment on a TU Delft LAMP server.",
     "type": "project",
     "license": "MIT",
     "require": {

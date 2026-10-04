@@ -70,7 +70,7 @@ $router->form('/admin/login/2fa', [AdminController::class, 'twoFactor']);
 $router->post('/admin/logout', [AdminController::class, 'logout']);
 $router->get('/admin', [AdminController::class, 'dashboard']);
 $router->form('/admin/users', [AdminController::class, 'users']);
-$router->form('/admin/machines', [AdminController::class, 'machines']);
+$router->form('/admin/equipment', [AdminController::class, 'equipment']);
 $router->form('/admin/bookings', [AdminController::class, 'bookings']);
 $router->form('/admin/settings', [AdminController::class, 'settings']);
 $router->get('/admin/audit', [AdminController::class, 'audit']);

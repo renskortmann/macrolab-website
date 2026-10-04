@@ -10,29 +10,29 @@ use Macrolab\Clock;
 use Macrolab\Csrf;
 use Macrolab\Http\Request;
 use Macrolab\Http\Response;
-use Macrolab\Booking\Resources;
+use Macrolab\Booking\Equipment;
 use Macrolab\Booking\RuleSet;
 use Macrolab\Session;
 use Macrolab\View;
 
 /**
- * The booking calendar, one machine at a time. Reached from the hub at /.
+ * The booking calendar, one piece of equipment at a time. Reached from the hub at /.
  *
- * Plain /booking shows no machine: the calendar is empty and read-only until
- * the member picks one, which reloads the page as /booking?machine=<slug>.
+ * Plain /booking shows no equipment: the calendar is empty and read-only until
+ * the member picks a piece, which reloads the page as /booking?equipment=<slug>.
  */
 final class CalendarController
 {
     public function show(Request $request): Response
     {
         $actor = Auth::requireActor();
-        $resource = Resources::selected($request->query('machine'));
+        $equipment = Equipment::selected($request->query('equipment'));
         $rules = RuleSet::fromSettings();
 
         return View::page('calendar', [
-            'title'    => $resource === null ? 'Booking' : (string) $resource['name'],
-            'resource' => $resource,
-            'machines' => Resources::allActive(),
+            'title'         => $equipment === null ? 'Booking' : (string) $equipment['name'],
+            'equipment'     => $equipment,
+            'equipmentList' => Equipment::allActive(),
             'actor'    => $actor,
             'rules'    => $rules,
             'csrf'     => Csrf::token(),
@@ -40,9 +40,9 @@ final class CalendarController
             // Handed to the browser as data attributes; the client mirrors the
             // rules for a civilised UI, but the server is what enforces them.
             'clientRules' => [
-                // null until a machine is picked: the browser then shows an
+                // null until a piece of equipment is picked: the browser then shows an
                 // empty, read-only calendar.
-                'resourceId'       => $resource === null ? null : (int) $resource['id'],
+                'equipmentId'      => $equipment === null ? null : (int) $equipment['id'],
                 'slotMinutes'      => $rules->slotMinutes,
                 'openTime'         => $rules->openTime,
                 'closeTime'        => $rules->closeTime,

@@ -167,7 +167,7 @@ final class BookingRulesTest extends TestCase
     }
 
     /**
-     * A long run holds the machine overnight. The hours in between are occupied
+     * A long run holds the equipment overnight. The hours in between are occupied
      * by design; only the two ends are held to the opening hours.
      */
     public function testAcceptsAnOvernightBooking(): void
@@ -201,7 +201,7 @@ final class BookingRulesTest extends TestCase
     public function testRejectsABookingThatRunsThroughAClosedDay(): void
     {
         // Friday 18 September 2026 through to Monday the 21st, over a weekend
-        // the machine is closed.
+        // the equipment is closed.
         $errors = $this->validate('2026-09-18 16:00', '2026-09-21 10:00',
             rules: $this->multiDayRules(), now: '2026-09-01 12:00');
 

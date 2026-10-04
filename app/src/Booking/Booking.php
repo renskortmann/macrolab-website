@@ -16,7 +16,7 @@ final class Booking
 {
     public function __construct(
         public readonly int $id,
-        public readonly int $resourceId,
+        public readonly int $equipmentId,
         public readonly int $userId,
         public readonly DateTimeImmutable $startsAt,
         public readonly DateTimeImmutable $endsAt,
@@ -25,7 +25,7 @@ final class Booking
         public readonly bool $createdByAdmin = false,
         public readonly ?string $ownerNetid = null,
         public readonly ?string $ownerName = null,
-        public readonly ?string $resourceName = null,
+        public readonly ?string $equipmentName = null,
     ) {
     }
 
@@ -36,7 +36,7 @@ final class Booking
     {
         return new self(
             id: (int) $row['id'],
-            resourceId: (int) $row['resource_id'],
+            equipmentId: (int) $row['equipment_id'],
             userId: (int) $row['user_id'],
             startsAt: Clock::fromSql((string) $row['starts_at']),
             endsAt: Clock::fromSql((string) $row['ends_at']),
@@ -47,8 +47,8 @@ final class Booking
                 ? (string) $row['owner_netid'] : null,
             ownerName: isset($row['owner_name']) && $row['owner_name'] !== null
                 ? (string) $row['owner_name'] : null,
-            resourceName: isset($row['resource_name']) && $row['resource_name'] !== null
-                ? (string) $row['resource_name'] : null,
+            equipmentName: isset($row['equipment_name']) && $row['equipment_name'] !== null
+                ? (string) $row['equipment_name'] : null,
         );
     }
 
