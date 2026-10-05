@@ -79,14 +79,27 @@ $chevron = static fn (string $points): string =>
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($matrix->rows as $row): ?>
+                <?php foreach ($matrix->rows as $r => $row): ?>
                     <tr>
                         <td><?= e($row['label']) ?></td>
-                        <?php foreach ($row['cells'] as $cell): ?>
+                        <?php foreach ($row['cells'] as $c => $cell): ?>
                             <?php if ($cell === null): ?>
                                 <td class="num"><span class="muted">-</span></td>
-                            <?php else: ?>
+                            <?php elseif ($cell['notes'] === []): ?>
                                 <td class="num"><?= e(TimeRules::formatHours($cell['minutes'])) ?> <span class="muted">(<?= e($cell['percent']) ?>%)</span></td>
+                            <?php else: ?>
+                                <?php /* The notes pop up on hover or focus (app.js); a corner mark shows they are there. */ ?>
+                                <td class="num has-notes" tabindex="0" aria-describedby="notes-<?= e($r . '-' . $c) ?>">
+                                    <?= e(TimeRules::formatHours($cell['minutes'])) ?> <span class="muted">(<?= e($cell['percent']) ?>%)</span>
+                                    <div class="cell-notes" id="notes-<?= e($r . '-' . $c) ?>" hidden>
+                                        <p class="cell-notes-title"><?= e($matrix->people[$c]['label']) ?> &middot; <?= e($row['label']) ?></p>
+                                        <ul>
+                                            <?php foreach ($cell['notes'] as $note): ?>
+                                                <li><span class="muted"><?= e($note['day']) ?>, <?= e(TimeRules::formatHours($note['minutes'])) ?></span> <?= e($note['note']) ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                </td>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </tr>

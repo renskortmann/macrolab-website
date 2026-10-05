@@ -144,6 +144,35 @@ final class TimeEntries
         );
     }
 
+    /**
+     * The entries with a note over a date range, both ends included, oldest
+     * first: the remarks shown when hovering over the overview's table.
+     *
+     * @return list<array{user_id: int, project_id: int, worked_on: string, minutes: int, note: string}>
+     */
+    public static function notesByUserAndProject(DateTimeImmutable $from, DateTimeImmutable $to): array
+    {
+        $rows = Db::get()->all(
+            'SELECT t.user_id, t.project_id, t.worked_on, t.minutes, t.note
+               FROM time_entries t
+              WHERE t.worked_on >= ? AND t.worked_on <= ?
+                AND t.note IS NOT NULL AND t.note <> \'\'
+              ORDER BY t.worked_on, t.id',
+            [$from->format('Y-m-d'), $to->format('Y-m-d')]
+        );
+
+        return array_map(
+            static fn (array $row): array => [
+                'user_id'    => (int) $row['user_id'],
+                'project_id' => (int) $row['project_id'],
+                'worked_on'  => (string) $row['worked_on'],
+                'minutes'    => (int) $row['minutes'],
+                'note'       => (string) $row['note'],
+            ],
+            $rows
+        );
+    }
+
     public static function countForUser(int $userId): int
     {
         return (int) Db::get()->value('SELECT COUNT(*) FROM time_entries WHERE user_id = ?', [$userId]);

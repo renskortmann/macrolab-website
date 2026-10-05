@@ -106,6 +106,32 @@ final class TimeOverviewPageTest extends DatabaseTestCase
         );
     }
 
+    public function testACellWithNotesCarriesThemForThePopup(): void
+    {
+        $xia = Users::findByNetid('xia');
+        TimeEntryService::create(
+            actor: Actor::forUser($xia),
+            projectId: Projects::findByName('Equipment maintenance')->id,
+            workedOn: new DateTimeImmutable('2026-09-04', new DateTimeZone('UTC')),
+            minutes: 30,
+            note: 'Pump <b>replaced</b>',
+        );
+
+        $body = $this->page(['date' => '2026-09-02']);
+
+        self::assertMatchesRegularExpression(
+            '#<td class="num has-notes" tabindex="0" aria-describedby="notes-0-0">\s*2:30 <span class="muted">\(100%\)</span>\s*'
+            . '<div class="cell-notes" id="notes-0-0" hidden>\s*<p class="cell-notes-title">xia &middot; Equipment maintenance</p>#',
+            $body
+        );
+        self::assertStringContainsString(
+            '<li><span class="muted">Fri 4 Sep, 0:30</span> Pump &lt;b&gt;replaced&lt;/b&gt;</li>',
+            $body,
+            'the note, escaped, with its day and hours'
+        );
+        self::assertSame(1, substr_count($body, 'has-notes'), 'only the cell with a note gets a popup');
+    }
+
     public function testTheTableIgnoresTheFilterBelowIt(): void
     {
         $body = $this->page(['date' => '2026-09-02', 'from' => '2026-09-08', 'to' => '2026-09-10']);

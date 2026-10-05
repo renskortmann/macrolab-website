@@ -89,10 +89,36 @@ final class TimeMatrixTest extends TestCase
         // Rows by name: Lab tidying (20), Maintenance (10); Teaching (30) is
         // in use with no time; Retired (40) has none and is left out.
         self::assertSame(['Lab tidying', 'Maintenance', 'Teaching'], array_column($matrix->rows, 'label'));
-        self::assertSame([['minutes' => 30, 'percent' => 25], ['minutes' => 45, 'percent' => 100]], $matrix->rows[0]['cells']);
-        self::assertSame([['minutes' => 90, 'percent' => 75], null], $matrix->rows[1]['cells']);
+        self::assertSame(
+            [['minutes' => 30, 'percent' => 25, 'notes' => []], ['minutes' => 45, 'percent' => 100, 'notes' => []]],
+            $matrix->rows[0]['cells']
+        );
+        self::assertSame([['minutes' => 90, 'percent' => 75, 'notes' => []], null], $matrix->rows[1]['cells']);
         self::assertSame([null, null], $matrix->rows[2]['cells']);
         self::assertSame([120, 45], $matrix->totals);
+    }
+
+    public function testNotesGoWithTheCellOfTheirPersonAndActivity(): void
+    {
+        $matrix = self::matrix(
+            [['id' => 1, 'netid' => 'a', 'display_name' => 'Ann A'], ['id' => 2, 'netid' => 'b', 'display_name' => 'Bob B']],
+            [[1, 10, 90], [2, 10, 30]],
+            [
+                ['user_id' => 1, 'project_id' => 10, 'worked_on' => '2026-10-05', 'minutes' => 60, 'note' => 'Replaced the pump'],
+                ['user_id' => 1, 'project_id' => 10, 'worked_on' => '2026-10-07', 'minutes' => 30, 'note' => 'Calibration'],
+            ],
+        );
+
+        $maintenance = $matrix->rows[1];
+        self::assertSame('Maintenance', $maintenance['label']);
+        self::assertSame(
+            [
+                ['day' => 'Mon 5 Oct', 'minutes' => 60, 'note' => 'Replaced the pump'],
+                ['day' => 'Wed 7 Oct', 'minutes' => 30, 'note' => 'Calibration'],
+            ],
+            $maintenance['cells'][0]['notes']
+        );
+        self::assertSame([], $maintenance['cells'][1]['notes'], 'Bob wrote none');
     }
 
     public function testARetiredActivityStaysWhileItHasTimeInThePeriod(): void
@@ -110,8 +136,9 @@ final class TimeMatrixTest extends TestCase
     /**
      * @param list<array<string, mixed>> $users
      * @param list<array{0: int, 1: int, 2: int}> $sums  user id, project id, minutes
+     * @param list<array{user_id: int, project_id: int, worked_on: string, minutes: int, note: string}> $notes
      */
-    private static function matrix(array $users, array $sums): TimeMatrix
+    private static function matrix(array $users, array $sums, array $notes = []): TimeMatrix
     {
         $projects = [
             new Project(10, 'Maintenance', null, null, true),
@@ -127,6 +154,7 @@ final class TimeMatrixTest extends TestCase
             $projects,
             $users,
             array_map(static fn (array $s): array => ['user_id' => $s[0], 'project_id' => $s[1], 'minutes' => $s[2]], $sums),
+            $notes,
         );
     }
 

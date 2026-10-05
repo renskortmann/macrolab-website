@@ -11,7 +11,8 @@ use Macrolab\Users;
  * The time registrations table on the overview page: activities down, people
  * across, for one week (Monday to Sunday) or one day. Each cell holds the
  * minutes a person logged on an activity and the share of that person's time
- * in the period, so every column adds up to 100%.
+ * in the period, so every column adds up to 100%, plus the notes on those
+ * entries, which the page shows when the cell is hovered over.
  *
  * Deliberately separate from TimeFilter: the table has its own period and
  * always shows everyone, whatever the filter of the export below it says.
@@ -26,7 +27,7 @@ final class TimeMatrix
 
     /**
      * @param list<array{id: int, label: string}>                                        $people  the columns
-     * @param list<array{label: string, cells: list<array{minutes: int, percent: int}|null>}> $rows
+     * @param list<array{label: string, cells: list<array{minutes: int, percent: int, notes: list<array{day: string, minutes: int, note: string}>}|null>}> $rows
      * @param list<int>                                                                    $totals  minutes per column
      */
     private function __construct(
@@ -57,6 +58,7 @@ final class TimeMatrix
             Projects::all(),
             Users::listAll(),
             TimeEntries::minutesByUserAndProject($from, $to),
+            TimeEntries::notesByUserAndProject($from, $to),
         );
     }
 
@@ -66,6 +68,7 @@ final class TimeMatrix
      * @param list<Project>                                                 $projects
      * @param list<array<string, mixed>>                                    $users  rows with id, netid, display_name
      * @param list<array{user_id: int, project_id: int, minutes: int}>      $sums
+     * @param list<array{user_id: int, project_id: int, worked_on: string, minutes: int, note: string}> $notes  oldest first
      */
     public static function build(
         string $period,
@@ -74,6 +77,7 @@ final class TimeMatrix
         array $projects,
         array $users,
         array $sums,
+        array $notes = [],
     ): self {
         /** @var array<int, array<int, int>> $minutes  project id => user id => minutes */
         $minutes = [];
@@ -82,6 +86,16 @@ final class TimeMatrix
                 $minutes[$sum['project_id']][$sum['user_id']] =
                     ($minutes[$sum['project_id']][$sum['user_id']] ?? 0) + $sum['minutes'];
             }
+        }
+
+        /** @var array<int, array<int, list<array{day: string, minutes: int, note: string}>>> $remarks */
+        $remarks = [];
+        foreach ($notes as $note) {
+            $remarks[$note['project_id']][$note['user_id']][] = [
+                'day'     => (new DateTimeImmutable($note['worked_on']))->format('D j M'),
+                'minutes' => $note['minutes'],
+                'note'    => $note['note'],
+            ];
         }
 
         // Columns: everyone with time in the period, by last name.
@@ -130,7 +144,11 @@ final class TimeMatrix
             $cells = [];
             foreach ($people as $column => $person) {
                 $logged = $minutes[$project->id][$person['id']] ?? 0;
-                $cells[] = $logged > 0 ? ['minutes' => $logged, 'percent' => $shares[$column][$index]] : null;
+                $cells[] = $logged > 0 ? [
+                    'minutes' => $logged,
+                    'percent' => $shares[$column][$index],
+                    'notes'   => $remarks[$project->id][$person['id']] ?? [],
+                ] : null;
             }
             $rows[] = ['label' => $project->label(), 'cells' => $cells];
         }

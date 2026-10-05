@@ -19,6 +19,7 @@
         wireDaySheet();
         wireMonthList();
         wireScrollTables();
+        wireCellNotes();
         initCalendar();
     });
 
@@ -743,6 +744,65 @@
         function refreshMonth() {
             loadMonth(new URLSearchParams(window.location.search).get('month'));
         }
+    }
+
+    /*
+     * The time overview's table: hovering over (or focusing) a cell with
+     * notes shows them in a popup. The notes are in the cell already, hidden;
+     * the popup lives on <body> with a fixed position, so the table's
+     * sideways scrolling box cannot clip it.
+     */
+    function wireCellNotes() {
+        var cells = document.querySelectorAll('.time-matrix td.has-notes');
+        if (!cells.length) {
+            return;
+        }
+
+        var popup = document.createElement('div');
+        popup.className = 'cell-popup';
+        popup.setAttribute('role', 'tooltip');
+        popup.hidden = true;
+        document.body.appendChild(popup);
+
+        var show = function (cell) {
+            var notes = cell.querySelector('.cell-notes');
+            popup.replaceChildren();
+            Array.prototype.forEach.call(notes.childNodes, function (node) {
+                popup.appendChild(node.cloneNode(true));
+            });
+            popup.hidden = false;
+
+            /* Below the cell, or above it when there is no room; never off screen. */
+            var box = cell.getBoundingClientRect();
+            var width = popup.offsetWidth;
+            var height = popup.offsetHeight;
+            var left = Math.max(8, Math.min(box.left + box.width / 2 - width / 2, window.innerWidth - width - 8));
+            var top = box.bottom + 6;
+            if (top + height > window.innerHeight - 8) {
+                top = Math.max(8, box.top - height - 6);
+            }
+            popup.style.left = left + 'px';
+            popup.style.top = top + 'px';
+        };
+
+        var hide = function () {
+            popup.hidden = true;
+        };
+
+        cells.forEach(function (cell) {
+            cell.addEventListener('mouseenter', function () { show(cell); });
+            cell.addEventListener('mouseleave', hide);
+            cell.addEventListener('focus', function () { show(cell); });
+            cell.addEventListener('blur', hide);
+        });
+
+        /* A fixed popup would stay put while its cell moves away. */
+        window.addEventListener('scroll', hide, true);
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                hide();
+            }
+        });
     }
 
     /*

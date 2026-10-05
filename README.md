@@ -645,7 +645,9 @@ and nobody edits somebody else's timesheet. It has two cards:
   fit scroll sideways. Each cell holds the
   hours and that person's share of their own time in the period, so each
   column adds up to 100% (rounded by largest remainder), and a Total row
-  closes the table. Above it is a toolbar styled after the booking calendar's:
+  closes the table. A cell whose entries carry notes has a small mark in its
+  corner; hovering over it (or tabbing to it) shows those notes, each with its
+  day and hours. Above it is a toolbar styled after the booking calendar's:
   previous and next, Today, the dates, and Week (Monday to Sunday, so weekend
   hours count) or Day. It opens on the current week. Its period is
   independent of the filter below it, and it always shows everyone. The
