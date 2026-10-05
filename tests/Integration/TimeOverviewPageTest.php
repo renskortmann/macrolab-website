@@ -83,13 +83,11 @@ final class TimeOverviewPageTest extends DatabaseTestCase
 
         self::assertStringContainsString('<h2 class="period-title">31 Aug - 6 Sep 2026</h2>', $body, 'Monday to Sunday');
         self::assertMatchesRegularExpression(
-            '#<th>Activity</th>\s*<th class="person" scope="col"><span>Ann van den Berg</span></th>\s*'
-            . '<th class="person" scope="col"><span>xia</span></th>#',
+            '#<th>Activity</th>\s*<th class="num" scope="col">Ann van den Berg</th>\s*'
+            . '<th class="num" scope="col">xia</th>#',
             $body,
             'by last name, the netID standing in for a missing name'
         );
-        self::assertStringContainsString('<div class="matrix-scroll" style="--name-length: 16">', $body,
-            'the header row is sized for the longest name, which stands at 45 degrees');
         self::assertMatchesRegularExpression(
             '#<td>Equipment maintenance</td>\s*<td class="num">1:30 <span class="muted">\(75%\)</span></td>\s*'
             . '<td class="num">2:00 <span class="muted">\(100%\)</span></td>#',

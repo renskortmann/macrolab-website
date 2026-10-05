@@ -68,19 +68,13 @@ $chevron = static fn (string $points): string =>
     <?php if ($matrix->isEmpty()): ?>
         <p class="muted">Nothing logged <?= $matrix->period === TimeMatrix::DAY ? 'on this day' : 'this week' ?>.</p>
     <?php else: ?>
-        <?php
-        // The names stand at 45 degrees, so a column is only as wide as its
-        // hours. The header row is made tall enough for the longest name, and
-        // the right edge leaves room for the last one to lean into.
-        $nameLength = max(array_map(static fn (array $p): int => mb_strlen($p['label']), $matrix->people));
-        ?>
-        <div class="matrix-scroll" style="--name-length: <?= e($nameLength) ?>">
+        <div class="matrix-scroll">
             <table class="time-matrix">
                 <thead>
                 <tr>
                     <th>Activity</th>
                     <?php foreach ($matrix->people as $person): ?>
-                        <th class="person" scope="col"><span><?= e($person['label']) ?></span></th>
+                        <th class="num" scope="col"><?= e($person['label']) ?></th>
                     <?php endforeach; ?>
                 </tr>
                 </thead>

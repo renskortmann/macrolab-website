@@ -641,8 +641,8 @@ and nobody edits somebody else's timesheet. It has two cards:
 
 - **Time registrations table**: the activities down the side, and a column for
   everyone who logged time in the period, ordered by last name (the last word
-  of the display name, so "van der Berg" sorts under B). The names stand at
-  45 degrees so that many people fit; more scroll sideways. Each cell holds the
+  of the display name, so "van der Berg" sorts under B); more people than
+  fit scroll sideways. Each cell holds the
   hours and that person's share of their own time in the period, so each
   column adds up to 100% (rounded by largest remainder), and a Total row
   closes the table. Above it is a toolbar styled after the booking calendar's:
