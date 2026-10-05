@@ -14,7 +14,7 @@ use Macrolab\Clock;
     <h1>Audit log</h1>
 
     <p class="muted small">
-        <?= e($total) ?> entries. Every booking change, every time entry and
+        <?= e($total) ?> entries. Every equipment booking change, every time entry and
         activity change, every change to the allowlist or the rules, and every
         sign-in - including refused ones.
     </p>

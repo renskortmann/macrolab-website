@@ -16,9 +16,17 @@ to the other, and the code is split accordingly (`app/src/Booking/`,
 `app/src/Time/`; see [Layout](#layout)).
 
 Signing in lands on the **hub** at `/`, which links to what the member's role
-allows (see [Roles](#roles)). One administrator controls who may sign in and
-with which role, manages the equipment and the booking rules, can
-create, change or delete any booking, maintains the list of activities time is
+allows (see [Roles](#roles)), one tile each, side by side, with an icon: a
+wrench for equipment booking, a clock for time registration, a spreadsheet for
+the time overview, a head and shoulders for the account (and a gear for
+Administration).
+
+The screens always say **equipment booking**, never "booking" alone, because
+"booking time" could just as well mean registering hours. Inside the equipment
+booking pages, where the equipment is named anyway, a single reservation is
+still "a booking". One administrator controls who may sign in and
+with which role, manages the equipment and the equipment booking rules,
+can create, change or delete any equipment booking, maintains the list of activities time is
 logged against, and reads what everyone has logged (see
 [Time registration](#time-registration)).
 
@@ -37,7 +45,7 @@ even when SSO is unavailable.
 Every member account has one of three roles, set by the administrator under
 **Who may sign in**:
 
-| Role | Booking | Own time registration | Everyone's time (read-only, CSV) |
+| Role | Equipment booking | Own time registration | Everyone's time (read-only, CSV) |
 |---|---|---|---|
 | **Lab user** | yes | - | - |
 | **Lab technician** | yes | yes | - |
@@ -423,9 +431,9 @@ because the allowlist is checked on every request - and keeps the person's
 bookings and registered time. **Remove** is only offered when they have no
 bookings and no registered time at all.
 
-### Booking rules
+### Equipment booking rules
 
-**Booking rules** sets slot length, opening hours and days, minimum and maximum
+**Rules** sets slot length, opening hours and days, minimum and maximum
 booking length, how far ahead people may book, how many upcoming bookings each
 may hold, and how much notice is needed to change one. They apply to lab
 members; they do not apply to you. Overlapping bookings are refused for
@@ -433,7 +441,7 @@ everyone, including you.
 
 ### Audit log
 
-Every booking change, time entry change, activity change, allowlist change,
+Every equipment booking change, time entry change, activity change, allowlist change,
 settings change and sign-in - including refused ones - is recorded with who, when and from which address. Entries are
 kept for the number of days set in the rules (365 by default) and pruned by
 `app/cli/prune.php`.
@@ -588,7 +596,7 @@ record of who used what stays intact. Retiring one hides it from the picker
 and stops new bookings; the bookings it already has are untouched. The last
 piece still in use cannot be retired.
 
-Booking rules are shared by all equipment. The per-person quota counts per
+The equipment booking rules are shared by all equipment. The per-person quota counts per
 piece of equipment, so filling up one does not lock anybody out of the others.
 
 ## Time registration
@@ -607,7 +615,7 @@ administrator keeps the list at `/admin/projects`, and every entry names one
 activity, with an optional code of its own. Only lab technicians and lab
 managers can open `/time`; lab users are not shown it (see [Roles](#roles)).
 
-**This system is not connected to the booking system.** A time entry names an
+**This system is not connected to the equipment booking system.** A time entry names an
 activity and never equipment. The two halves share the sign-in and nothing else,
 which is deliberate: hours are booked to work, not to equipment. Time spent
 maintaining a piece of equipment is logged against a maintenance activity, not
@@ -637,7 +645,7 @@ reasoning as retiring a piece of equipment. For the same reason, an account with
 registered cannot be removed from the allowlist, only suspended.
 
 The limits on entry length, on the daily total, and on how far ahead or back
-time may be logged are set alongside the booking rules at `/admin/settings`.
+time may be logged are set alongside the equipment booking rules at `/admin/settings`.
 
 The CSV is UTF-8 with a byte-order mark, so Excel reads accented names
 correctly. Any cell beginning with `=`, `+`, `-` or `@` is prefixed with an

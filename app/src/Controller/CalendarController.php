@@ -32,7 +32,7 @@ final class CalendarController
         return View::page('calendar', [
             // Neither the heading nor the browser tab changes with the
             // equipment; the date label above the calendar names it.
-            'title'         => 'Booking',
+            'title'         => 'Equipment booking',
             'equipment'     => $equipment,
             'equipmentList' => Equipment::allActive(),
             'actor'    => $actor,

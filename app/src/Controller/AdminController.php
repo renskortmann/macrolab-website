@@ -300,8 +300,8 @@ final class AdminController
                 // instead of an explanation.
                 if (Users::countBookings($user->id) > 0) {
                     throw new RuntimeException(
-                        $user->netid . ' has bookings on record. Suspend the account instead of deleting it, '
-                        . 'or delete those bookings first.'
+                        $user->netid . ' has equipment bookings on record. Suspend the account instead of deleting it, '
+                        . 'or delete those equipment bookings first.'
                     );
                 }
 
@@ -421,7 +421,7 @@ final class AdminController
                 if (Equipment::countBookings($equipmentId) > 0) {
                     throw new RuntimeException(
                         $name . ' has bookings on record. Retire it instead of deleting it, '
-                        . 'or delete those bookings first.'
+                        . 'or delete those equipment bookings first.'
                     );
                 }
 
@@ -462,7 +462,7 @@ final class AdminController
         $filtered = $filter === '' ? null : Equipment::findBySlug($filter);
 
         return View::page('admin/bookings', [
-            'title'         => 'All bookings',
+            'title'         => 'All equipment bookings',
             'bookings'      => Bookings::recent($filtered === null ? null : (int) $filtered['id'], 300, true),
             'users'         => Users::listAll(),
             'equipmentList' => Equipment::all(),
@@ -495,7 +495,7 @@ final class AdminController
 
             BookingService::create($actor, (int) $piece['id'], $start, $end,
                 $request->post('purpose'), $owner->id);
-            Session::flash('success', 'Booking created for ' . $owner->netid . '.');
+            Session::flash('success', 'Equipment booking created for ' . $owner->netid . '.');
 
             return;
         }
@@ -516,17 +516,17 @@ final class AdminController
                 }
 
                 BookingService::update($actor, $booking, $start, $end, $request->post('purpose'));
-                Session::flash('success', 'Booking updated.');
+                Session::flash('success', 'Equipment booking updated.');
                 break;
 
             case 'cancel':
                 BookingService::cancel($actor, $booking);
-                Session::flash('success', 'Booking cancelled.');
+                Session::flash('success', 'Equipment booking cancelled.');
                 break;
 
             case 'delete':
                 BookingService::delete($actor, $booking);
-                Session::flash('success', 'Booking deleted.');
+                Session::flash('success', 'Equipment booking deleted.');
                 break;
 
             default:

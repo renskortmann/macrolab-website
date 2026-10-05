@@ -76,7 +76,7 @@ use Macrolab\Role;
             <thead>
             <tr>
                 <th>netID</th><th>Name</th><th>Role</th><th>Status</th><th>Password</th>
-                <th>Bookings</th><th>Time entries</th><th>Last signed in</th><th>Actions</th>
+                <th>Equipment bookings</th><th>Time entries</th><th>Last signed in</th><th>Actions</th>
             </tr>
             </thead>
             <tbody>

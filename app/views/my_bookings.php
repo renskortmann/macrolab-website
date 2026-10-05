@@ -10,7 +10,7 @@
 use Macrolab\Clock;
 ?>
 <?php if ($bookings === []): ?>
-    <p class="muted">You have no upcoming bookings.</p>
+    <p class="muted">You have no upcoming equipment bookings.</p>
 <?php else: ?>
     <table>
         <thead>

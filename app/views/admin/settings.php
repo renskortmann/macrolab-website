@@ -33,7 +33,7 @@ $timeField = static function (string $name, string $selected) use ($times): stri
     <h1>Rules</h1>
 
     <p class="muted small">
-        The booking rules and the time registration rules, which have nothing to
+        The equipment booking rules and the time registration rules, which have nothing to
         do with each other. Both apply to lab members. Neither applies to you.
     </p>
 
@@ -66,7 +66,7 @@ $timeField = static function (string $name, string $selected) use ($times): stri
         </fieldset>
 
         <fieldset>
-            <legend>Size and shape of a booking</legend>
+            <legend>Size and shape of an equipment booking</legend>
 
             <label for="slot_minutes">Slot length (minutes)</label>
             <input id="slot_minutes" name="slot_minutes" type="number" min="5" max="1440" required
@@ -93,7 +93,7 @@ $timeField = static function (string $name, string $selected) use ($times): stri
             <input id="max_advance_days" name="max_advance_days" type="number" min="1" max="1095" required
                    value="<?= e($settings['max_advance_days'] ?? '60') ?>">
 
-            <label for="max_active_bookings_per_user">Upcoming bookings per person (0 = no limit)</label>
+            <label for="max_active_bookings_per_user">Upcoming equipment bookings per person (0 = no limit)</label>
             <input id="max_active_bookings_per_user" name="max_active_bookings_per_user"
                    type="number" min="0" max="100" required
                    value="<?= e($settings['max_active_bookings_per_user'] ?? '3') ?>">
@@ -148,7 +148,7 @@ $timeField = static function (string $name, string $selected) use ($times): stri
 
             <p class="muted small">
                 These govern the hours technicians log. They are unrelated to
-                the booking rules above: time is logged against an activity
+                the equipment booking rules above: time is logged against an activity
                 under the general lab code, never against equipment.
             </p>
 

@@ -35,11 +35,11 @@ $dateField = static function (string $name, string $label, string $value, string
 };
 ?>
 <section class="card">
-    <h1>All bookings</h1>
+    <h1>All equipment bookings</h1>
 
     <p class="muted small">
-        As administrator you may create, change and delete any booking, and the
-        booking rules do not restrict you. Two bookings still cannot overlap.
+        As administrator you may create, change and delete any equipment booking, and
+        the equipment booking rules do not restrict you. Two bookings still cannot overlap.
         Every change here is recorded in the <a href="<?= e(path('/admin/audit')) ?>">audit log</a>.
     </p>
 
@@ -47,7 +47,7 @@ $dateField = static function (string $name, string $label, string $value, string
         <p class="alert" role="alert"><?= e($error) ?></p>
     <?php endif; ?>
 
-    <h2>Create a booking for someone</h2>
+    <h2>Create an equipment booking for someone</h2>
 
     <form method="post" action="<?= e(path('/admin/bookings')) ?>" class="row">
         <?= Csrf::field() ?>
@@ -93,7 +93,7 @@ $dateField = static function (string $name, string $label, string $value, string
 </section>
 
 <section class="card">
-    <h2>Bookings</h2>
+    <h2>Equipment bookings</h2>
 
     <form method="get" action="<?= e(path('/admin/bookings')) ?>" class="row">
         <label for="equipment_filter">Show</label>
@@ -109,7 +109,7 @@ $dateField = static function (string $name, string $label, string $value, string
     </form>
 
     <?php if ($bookings === []): ?>
-        <p class="muted">No bookings yet.</p>
+        <p class="muted">No equipment bookings yet.</p>
     <?php else: ?>
         <table class="wide">
             <thead>

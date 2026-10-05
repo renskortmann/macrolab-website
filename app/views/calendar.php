@@ -44,8 +44,8 @@ use Macrolab\Clock;
 
     <p class="muted small rules-summary">
         <?php if ($actor->isAdmin): ?>
-            You are signed in as the administrator: the booking rules below do not
-            apply to you, but two bookings still cannot overlap.
+            You are signed in as the administrator: the equipment booking rules below
+            do not apply to you, but two bookings still cannot overlap.
         <?php else: ?>
             Bookable <?= e(BookingRules::humanDays($rules->openDays)) ?>,
             <?= e($rules->openTime) ?>-<?= e($rules->closeTime) ?>,
@@ -74,7 +74,7 @@ use Macrolab\Clock;
 <?php /* The administrator holds no bookings of their own, so has no list. */ ?>
 <?php if ($actor->userId() !== null): ?>
     <section class="card" id="my-bookings">
-        <h2>My upcoming bookings</h2>
+        <h2>My upcoming equipment bookings</h2>
         <div id="my-bookings-list" data-url="<?= e(path('/api/bookings/mine')) ?>">
             <?= \Macrolab\View::render('my_bookings', ['bookings' => $mine]) ?>
         </div>

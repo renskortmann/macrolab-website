@@ -11,8 +11,8 @@ use Macrolab\Csrf;
 
     <p class="muted small">
         Every booking belongs to one piece of equipment. Members choose which
-        calendar they are looking at from the list at the top of the booking
-        page.
+        calendar they are looking at from the list at the top of the equipment
+        booking page.
     </p>
 
     <?php if ($error !== null): ?>

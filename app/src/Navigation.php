@@ -57,7 +57,7 @@ final class Navigation
             ['href' => '/admin',           'label' => 'Dashboard'],
             ['href' => '/admin/users',     'label' => 'Who may sign in'],
             ['href' => '/admin/equipment', 'label' => 'Equipment'],
-            ['href' => '/admin/bookings',  'label' => 'All bookings'],
+            ['href' => '/admin/bookings',  'label' => 'All equipment bookings'],
             ['href' => '/admin/projects',  'label' => 'Activities'],
             ['href' => '/admin/settings',  'label' => 'Rules'],
             ['href' => '/admin/audit',     'label' => 'Audit log'],
@@ -66,7 +66,10 @@ final class Navigation
     }
 
     /**
-     * @return list<array{href: string, label: string, blurb: string}>
+     * Each destination names an icon, drawn by the hub (hub.php); the top bar
+     * shows the label alone.
+     *
+     * @return list<array{href: string, label: string, icon: string, blurb: string}>
      */
     public static function destinations(?Actor $actor): array
     {
@@ -85,17 +88,20 @@ final class Navigation
             return [
                 [
                     'href'  => '/booking',
-                    'label' => 'Booking',
+                    'label' => 'Equipment booking',
+                    'icon'  => 'wrench',
                     'blurb' => 'The shared calendar for the lab equipment.',
                 ],
                 [
                     'href'  => '/admin/time',
                     'label' => 'Time overview',
+                    'icon'  => 'sheet',
                     'blurb' => 'What everyone has logged, with filters and a CSV export.',
                 ],
                 [
                     'href'  => '/admin',
                     'label' => 'Administration',
+                    'icon'  => 'settings',
                     'blurb' => 'People, equipment, activities, rules and the audit log.',
                 ],
             ];
@@ -105,7 +111,8 @@ final class Navigation
         // is not shown time registration at all (and is refused at /time).
         $destinations = [[
             'href'  => '/booking',
-            'label' => 'Booking',
+            'label' => 'Equipment booking',
+            'icon'  => 'wrench',
             'blurb' => 'Book time on lab equipment, and change or cancel your own bookings.',
         ]];
 
@@ -113,6 +120,7 @@ final class Navigation
             $destinations[] = [
                 'href'  => '/time',
                 'label' => 'Time registration',
+                'icon'  => 'clock',
                 'blurb' => 'Log your hours on the activities under the general lab code. This function is only available to lab technicians and manager, not to regular lab users.',
             ];
         }
@@ -121,6 +129,7 @@ final class Navigation
             $destinations[] = [
                 'href'  => '/time/overview',
                 'label' => 'Time overview',
+                'icon'  => 'sheet',
                 'blurb' => 'What everyone has logged, with filters and a CSV export. This function is only available to the lab manager and to the system administrator.',
             ];
         }
@@ -128,6 +137,7 @@ final class Navigation
         $destinations[] = [
             'href'  => '/account',
             'label' => 'My account',
+            'icon'  => 'user',
             'blurb' => 'Your details, and your password.',
         ];
 
