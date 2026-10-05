@@ -15,6 +15,7 @@ use Macrolab\Session;
 use Macrolab\Time\TimeEntries;
 use Macrolab\Time\TimeEntry;
 use Macrolab\Time\TimeFilter;
+use Macrolab\Time\TimeMatrix;
 use Macrolab\Time\TimeRules;
 use Macrolab\Users;
 use Macrolab\View;
@@ -73,8 +74,8 @@ final class AdminTimeController
             'basePath'  => $request->path === '/time/overview' ? '/time/overview' : '/admin/time',
             'filter'    => $filter,
             'entries'   => TimeEntries::search($filter),
-            'totals'    => TimeEntries::totals($filter),
-            'byProject' => TimeEntries::totalsByProject($filter),
+            // The table at the top has its own period, apart from the filter.
+            'matrix'    => TimeMatrix::fromQuery($request->query('period'), $request->query('date')),
             'people'    => Users::listAll(),
             'projects'  => Projects::all(),
         ]);

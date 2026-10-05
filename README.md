@@ -636,14 +636,26 @@ and recorded, the same discipline the bookings use.
 
 The administrator maintains the activity list at `/admin/projects` and reads
 what everyone has logged at `/admin/time`; lab managers get the same overview
-at `/time/overview`. It filters by person, activity and date range, with a CSV
-export of exactly those rows (columns `date`, `netid`, `name`, `activity`,
-`activity_code`, `hours`, `minutes`, `note`, `entry_id`), separated by commas
-or by semicolons. That view is **read-only**: there is no approval step, and
-nobody edits somebody else's timesheet. The page has the filter on one line
-at the top, then **Time registrations overview** - the entries, oldest first,
-five rows at a time with an always-visible scrollbar, and the hours per
-activity - then **Export to CSV** with the totals and the download links.
+at `/time/overview`. That view is **read-only**: there is no approval step,
+and nobody edits somebody else's timesheet. It has two cards:
+
+- **Time registrations table**: the activities down the side, and a column for
+  everyone who logged time in the period, ordered by last name (the last word
+  of the display name, so "van der Berg" sorts under B). The names stand at
+  45 degrees so that many people fit; more scroll sideways. Each cell holds the
+  hours and that person's share of their own time in the period, so each
+  column adds up to 100% (rounded by largest remainder), and a Total row
+  closes the table. Above it is a toolbar styled after the booking calendar's:
+  previous and next, Today, the dates, and Week (Monday to Sunday, so weekend
+  hours count) or Day. It opens on the current week. Its period is
+  independent of the filter below it, and it always shows everyone. The
+  address carries it as `period=week|day&date=<ISO date>`.
+- **Export to CSV**: the filter on one line (date range, person, activity),
+  the entries it selects, oldest first, five rows at a time with an
+  always-visible scrollbar, and the download links. The CSV holds exactly
+  those rows (columns `date`, `netid`, `name`, `activity`, `activity_code`,
+  `hours`, `minutes`, `note`, `entry_id`), separated by commas or by
+  semicolons.
 
 An activity with time on record cannot be deleted, only retired - the same
 reasoning as retiring a piece of equipment. For the same reason, an account with time
@@ -718,7 +730,8 @@ Time registration (`app/src/Time/`):
 | `TimeRules`, `TimeRuleSet` | the time rules and the hour/date parsing, as pure functions |
 | `TimeEntryService` | time writes, with the daily cap and the audit entry |
 | `TimeEntryPolicy` | who may change which time entry - the admin may not |
-| `TimeFilter` | one filter behind the admin table, its totals and the export |
+| `TimeFilter` | one filter behind the overview's entry list and the export |
+| `TimeMatrix` | the overview's table: hours and shares per activity per person, for a week or a day |
 
 `Csv` (shared) writes the time export, quoted and safe to open in a
 spreadsheet.

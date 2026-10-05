@@ -85,7 +85,10 @@ final class RolesTest extends DatabaseTestCase
         self::assertStringContainsString('action="/time/overview"', $page->body, 'the filter stays on the manager path');
         self::assertStringContainsString('/time/overview.csv?', $page->body, 'and so do the export links');
         self::assertStringContainsString('<div class="filter-fields">', $page->body, 'the filter is laid out as a grid');
-        self::assertMatchesRegularExpression('#<h2>Export to CSV</h2>.*<h3>Totals</h3>.*<h3>Download</h3>#s', $page->body);
+        self::assertMatchesRegularExpression('#<h1>Time registrations table</h1>.*<h2>Export to CSV</h2>#s', $page->body,
+            'the same two cards as the administrator gets');
+        self::assertStringContainsString('href="/time/overview?period=day&amp;', $page->body,
+            'the table\'s links stay on the manager path too');
 
         $csv = (new AdminTimeController())->export(new Request('GET', '/time/overview.csv', query: ['sep' => 'semicolon']));
         self::assertStringContainsString('date;netid;name', $csv->body);

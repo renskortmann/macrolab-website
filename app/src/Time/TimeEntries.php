@@ -119,46 +119,26 @@ final class TimeEntries
     }
 
     /**
-     * @return array{entries: int, minutes: int}
-     */
-    public static function totals(TimeFilter $filter): array
-    {
-        [$where, $params] = $filter->toSql();
-
-        $row = Db::get()->one(
-            'SELECT COUNT(*) AS entries, COALESCE(SUM(t.minutes), 0) AS minutes
-               FROM time_entries t' . $where,
-            $params
-        );
-
-        return [
-            'entries' => (int) ($row['entries'] ?? 0),
-            'minutes' => (int) ($row['minutes'] ?? 0),
-        ];
-    }
-
-    /**
-     * Minutes per project over the filtered range, largest first.
+     * Minutes per person per project over a date range, both ends included,
+     * for the time registrations table on the overview page.
      *
-     * @return list<array{project: string, minutes: int}>
+     * @return list<array{user_id: int, project_id: int, minutes: int}>
      */
-    public static function totalsByProject(TimeFilter $filter): array
+    public static function minutesByUserAndProject(DateTimeImmutable $from, DateTimeImmutable $to): array
     {
-        [$where, $params] = $filter->toSql();
-
         $rows = Db::get()->all(
-            'SELECT p.name AS project, COALESCE(SUM(t.minutes), 0) AS minutes
+            'SELECT t.user_id, t.project_id, SUM(t.minutes) AS minutes
                FROM time_entries t
-               JOIN projects p ON p.id = t.project_id' . $where . '
-              GROUP BY p.id, p.name
-              ORDER BY minutes DESC, p.name',
-            $params
+              WHERE t.worked_on >= ? AND t.worked_on <= ?
+              GROUP BY t.user_id, t.project_id',
+            [$from->format('Y-m-d'), $to->format('Y-m-d')]
         );
 
         return array_map(
             static fn (array $row): array => [
-                'project' => (string) $row['project'],
-                'minutes' => (int) $row['minutes'],
+                'user_id'    => (int) $row['user_id'],
+                'project_id' => (int) $row['project_id'],
+                'minutes'    => (int) $row['minutes'],
             ],
             $rows
         );

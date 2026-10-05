@@ -3,8 +3,12 @@
  * The read-only view of what everyone has logged, for the administrator (at
  * /admin/time) and for lab managers (at /time/overview).
  *
- * Top to bottom: the filter on one line; the entries with the hours per
- * activity; the totals and the CSV export. Every card folds (app.js).
+ * Two cards. On top, the time registrations table: activities down, people
+ * across, one week or one day, with a toolbar styled after the booking
+ * calendar's. Below, the CSV export: the filter, the entries it selects, and
+ * the download links. The two are independent - the table has its own period
+ * (period=, date=) and the filter its own range - but every link and the
+ * filter form carry both, so neither is lost. Every card folds (app.js).
  *
  * Read-only on purpose: there is no approval step, and nobody edits somebody
  * else's timesheet. See Macrolab\Time\TimeEntryPolicy.
@@ -12,18 +16,109 @@
  * @var string                                     $basePath  /admin/time or /time/overview
  * @var \Macrolab\Time\TimeFilter                  $filter
  * @var list<\Macrolab\Time\TimeEntry>             $entries
- * @var array{entries: int, minutes: int}          $totals
- * @var list<array{project: string, minutes: int}> $byProject
+ * @var \Macrolab\Time\TimeMatrix                  $matrix
  * @var list<array<string, mixed>>                 $people
  * @var list<\Macrolab\Time\Project>               $projects
  */
 
+use Macrolab\Time\TimeMatrix;
 use Macrolab\Time\TimeRules;
+
+/** A link to the table for $period around $date, keeping the filter below. */
+$periodLink = static function (string $period, DateTimeImmutable $date) use ($basePath, $filter): string {
+    return path($basePath . '?' . http_build_query(['period' => $period, 'date' => $date->format('Y-m-d')])
+        . '&' . $filter->queryString());
+};
+
+$unit = $matrix->period === TimeMatrix::DAY ? 'day' : 'week';
+$chevron = static fn (string $points): string =>
+    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor"'
+    . ' stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="' . $points . '"/></svg>';
 ?>
 <section class="card">
-    <h1>Time overview</h1>
+    <h1>Time registrations table</h1>
+
+    <div class="period-toolbar">
+        <div class="period-chunk">
+            <span class="btn-group">
+                <a class="btn-dark" href="<?= e($periodLink($matrix->period, $matrix->previous())) ?>"
+                   aria-label="Previous <?= e($unit) ?>" title="Previous <?= e($unit) ?>"><?= $chevron('M15 18l-6-6 6-6') ?></a>
+                <a class="btn-dark" href="<?= e($periodLink($matrix->period, $matrix->next())) ?>"
+                   aria-label="Next <?= e($unit) ?>" title="Next <?= e($unit) ?>"><?= $chevron('M9 18l6-6-6-6') ?></a>
+            </span>
+            <?php if ($matrix->showsToday()): ?>
+                <a class="btn-dark" aria-disabled="true">Today</a>
+            <?php else: ?>
+                <a class="btn-dark" href="<?= e($periodLink($matrix->period, TimeRules::today())) ?>">Today</a>
+            <?php endif; ?>
+        </div>
+
+        <h2 class="period-title"><?= e($matrix->label()) ?></h2>
+
+        <div class="period-chunk">
+            <span class="btn-group">
+                <?php foreach ([TimeMatrix::WEEK => 'Week', TimeMatrix::DAY => 'Day'] as $period => $label): ?>
+                    <a class="btn-dark" href="<?= e($periodLink($period, $matrix->from)) ?>"
+                        <?= $period === $matrix->period ? 'aria-current="true"' : '' ?>><?= e($label) ?></a>
+                <?php endforeach; ?>
+            </span>
+        </div>
+    </div>
+
+    <?php if ($matrix->isEmpty()): ?>
+        <p class="muted">Nothing logged <?= $matrix->period === TimeMatrix::DAY ? 'on this day' : 'this week' ?>.</p>
+    <?php else: ?>
+        <?php
+        // The names stand at 45 degrees, so a column is only as wide as its
+        // hours. The header row is made tall enough for the longest name, and
+        // the right edge leaves room for the last one to lean into.
+        $nameLength = max(array_map(static fn (array $p): int => mb_strlen($p['label']), $matrix->people));
+        ?>
+        <div class="matrix-scroll" style="--name-length: <?= e($nameLength) ?>">
+            <table class="time-matrix">
+                <thead>
+                <tr>
+                    <th>Activity</th>
+                    <?php foreach ($matrix->people as $person): ?>
+                        <th class="person" scope="col"><span><?= e($person['label']) ?></span></th>
+                    <?php endforeach; ?>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($matrix->rows as $row): ?>
+                    <tr>
+                        <td><?= e($row['label']) ?></td>
+                        <?php foreach ($row['cells'] as $cell): ?>
+                            <?php if ($cell === null): ?>
+                                <td class="num"><span class="muted">-</span></td>
+                            <?php else: ?>
+                                <td class="num"><?= e(TimeRules::formatHours($cell['minutes'])) ?> <span class="muted">(<?= e($cell['percent']) ?>%)</span></td>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <th scope="row">Total</th>
+                    <?php foreach ($matrix->totals as $minutes): ?>
+                        <td class="num"><?= e(TimeRules::formatHours($minutes)) ?> <span class="muted">(100%)</span></td>
+                    <?php endforeach; ?>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    <?php endif; ?>
+</section>
+
+<section class="card">
+    <h2>Export to CSV</h2>
 
     <form method="get" action="<?= e(path($basePath)) ?>" class="filter filter-line">
+        <?php /* The table above keeps its period when the filter is applied. */ ?>
+        <input type="hidden" name="period" value="<?= e($matrix->period) ?>">
+        <input type="hidden" name="date" value="<?= e($matrix->from->format('Y-m-d')) ?>">
+
         <div class="filter-fields">
             <div class="filter-field">
                 <label for="from">From</label>
@@ -66,10 +161,6 @@ use Macrolab\Time\TimeRules;
             </div>
         </div>
     </form>
-</section>
-
-<section class="card">
-    <h2>Time registrations overview</h2>
 
     <?php if ($entries === []): ?>
         <p class="muted">Nothing logged in that range.</p>
@@ -101,42 +192,19 @@ use Macrolab\Time\TimeRules;
         </p>
     <?php endif; ?>
 
-    <?php if ($byProject !== []): ?>
-        <h3>By activity</h3>
-        <dl class="facts">
-            <?php foreach ($byProject as $row): ?>
-                <dt><?= e($row['project']) ?></dt>
-                <dd><?= e(TimeRules::formatHours($row['minutes'])) ?></dd>
-            <?php endforeach; ?>
-        </dl>
-    <?php endif; ?>
-</section>
+    <p>
+        Download these rows as CSV:
+        <a href="<?= e(path($basePath . '.csv?' . $filter->queryString() . '&sep=semicolon')) ?>">with semicolons</a>
+        or
+        <a href="<?= e(path($basePath . '.csv?' . $filter->queryString() . '&sep=comma')) ?>">with commas</a>
+    </p>
 
-<section class="card">
-    <h2>Export to CSV</h2>
-
-    <div class="overview-results overview-export">
-        <h3>Totals</h3>
-        <dl class="facts">
-            <dt>Entries</dt><dd><?= e($totals['entries']) ?></dd>
-            <dt>Total hours</dt><dd><?= e(TimeRules::formatHours($totals['minutes'])) ?></dd>
-        </dl>
-
-        <h3>Download</h3>
-        <p>
-            Download these rows as CSV:
-            <a href="<?= e(path($basePath . '.csv?' . $filter->queryString() . '&sep=semicolon')) ?>">with semicolons</a>
-            or
-            <a href="<?= e(path($basePath . '.csv?' . $filter->queryString() . '&sep=comma')) ?>">with commas</a>
-        </p>
-
-        <p class="muted small">
-            The export covers exactly what the filter above shows. Choose
-            <em>semicolons</em> for Excel with Dutch or other European settings:
-            the hours then use a decimal comma (3,50), so Excel can add them up.
-            Choose <em>commas</em> for other spreadsheets and English settings
-            (3.50). If a double-click does not split the columns, open the file
-            through <em>Data &rarr; From Text/CSV</em>.
-        </p>
-    </div>
+    <p class="muted small">
+        The export covers exactly what the filter above shows. Choose
+        <em>semicolons</em> for Excel with Dutch or other European settings:
+        the hours then use a decimal comma (3,50), so Excel can add them up.
+        Choose <em>commas</em> for other spreadsheets and English settings
+        (3.50). If a double-click does not split the columns, open the file
+        through <em>Data &rarr; From Text/CSV</em>.
+    </p>
 </section>

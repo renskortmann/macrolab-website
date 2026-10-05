@@ -11,10 +11,10 @@ use Macrolab\Http\Request;
  * What the administrator is currently looking at: optionally one person,
  * optionally one project, and a date range.
  *
- * This exists so the table, its totals, the per-project breakdown and the CSV
- * export all filter through one piece of code. Written out four times, that
- * WHERE clause drifts, and the export quietly stops matching the screen it was
- * taken from.
+ * This exists so the entry list and the CSV export filter through one piece
+ * of code. Written out twice, that WHERE clause drifts, and the export quietly
+ * stops matching the screen it was taken from. (The time registrations table
+ * above them has its own period; see TimeMatrix.)
  */
 final class TimeFilter
 {
