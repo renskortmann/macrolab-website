@@ -286,7 +286,17 @@ To do:
       rules are in the booking dialog; the legend is under the calendar; the
       date label is fixed (it showed "5 - 8 Oct" for a Mon-Fri week and
       "5 - 4 Oct" for a day).
-12. Next time: backups (ask ICT about server-level backups first; see item 3).
+12. ~~Time overview redesign~~ - live 2026-10-05 (commits `12714ae`,
+    `39fe23b`, `ada5112`; Pull + Deploy, then PHP Composer Install for the
+    new class `Time\TimeMatrix`; no migration), tested successfully on the
+    live site by the user. The page is two cards (see README "Time
+    registration"):
+    - "Time registrations table": activities × people, with hours and a
+      percentage per person, plus a Total row. Week (Mon-Sun) or Day, with a
+      toolbar styled after the booking calendar's. A note popup appears on
+      cells with a corner mark.
+    - "Export to CSV": the filter, the entries and the download links.
+13. Next time: backups (ask ICT about server-level backups first; see item 3).
    Until then, export the database from phpMyAdmin before each release that
    brings a migration.
 
