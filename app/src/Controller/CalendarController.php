@@ -19,7 +19,8 @@ use Macrolab\View;
  * The booking calendar, one piece of equipment at a time. Reached from the hub at /.
  *
  * Plain /booking shows no equipment: the calendar is empty and read-only until
- * the member picks a piece, which reloads the page as /booking?equipment=<slug>.
+ * the member picks a piece. The browser then switches equipment without a
+ * reload, keeping the dates shown, and puts ?equipment=<slug> in the address.
  */
 final class CalendarController
 {
@@ -31,7 +32,7 @@ final class CalendarController
 
         return View::page('calendar', [
             // Neither the heading nor the browser tab changes with the
-            // equipment; the date label above the calendar names it.
+            // equipment; the picker in the calendar's toolbar names it.
             'title'         => 'Equipment booking',
             'equipment'     => $equipment,
             'equipmentList' => Equipment::allActive(),
@@ -45,8 +46,6 @@ final class CalendarController
                 // null until a piece of equipment is picked: the browser then shows an
                 // empty, read-only calendar.
                 'equipmentId'      => $equipment === null ? null : (int) $equipment['id'],
-                // Leads the date label above the calendar.
-                'equipmentName'    => $equipment === null ? null : (string) $equipment['name'],
                 'slotMinutes'      => $rules->slotMinutes,
                 'openTime'         => $rules->openTime,
                 'closeTime'        => $rules->closeTime,

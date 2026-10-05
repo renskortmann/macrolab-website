@@ -189,9 +189,9 @@
         var feedUrl = el.dataset.feed;
         var csrf = el.dataset.csrf;
 
-        /* No equipment picked yet: an empty, read-only calendar that points to
-           the picker when someone tries to book. */
-        var hasEquipment = cfg.equipmentId !== null;
+        /* No equipment picked yet (cfg.equipmentId null): an empty, read-only
+           calendar that points to the picker when someone tries to book. The
+           picker changes cfg.equipmentId; see wireEquipmentPicker(). */
         var noticeEl = document.getElementById('calendar-notice');
         var equipmentEl = document.getElementById('equipment');
         var noticeTimer = null;
@@ -201,6 +201,8 @@
         var titleEl = document.getElementById('booking-dialog-title');
         var errorEl = document.getElementById('booking-dialog-error');
         var forEl = document.getElementById('booking-dialog-for');
+        var dialogEquipmentEl = document.getElementById('booking-dialog-equipment');
+        var rulesEl = document.getElementById('booking-rules');
         var start = whenField('start');
         var end = whenField('end');
         var purposeEl = document.getElementById('booking-purpose');
@@ -294,15 +296,13 @@
             /* Dates are spelled out day first. The bundled library carries no
                locale data, so its own defaults would read as American; these
                callbacks decide the wording rather than the viewer's browser. */
-            /* The equipment's name leads the date: "LUNA OD6 28 Sep - 1 Oct 2026".
-               The dates are kept together - non-breaking spaces, and a word
-               joiner after the dash, which is otherwise a place to break - so
-               a long label wraps between the name and the dates. */
+            /* Just the dates, "5 - 9 Oct 2026": the equipment picker sits to
+               their left. Kept on one line - non-breaking spaces, and a word
+               joiner after the dash, which is otherwise a place to break. */
             titleFormat: function (arg) {
-                var dates = rangeLabel(arg.start, arg.end)
+                return rangeLabel(arg.start, arg.end)
                     .replace(/ /g, '\u00a0')
                     .replace(/-/g, '-\u2060');
-                return cfg.equipmentName ? cfg.equipmentName + ' ' + dates : dates;
             },
             dayHeaderFormat: function (arg) {
                 return WEEKDAYS[arg.date.marker.getUTCDay()] + ' ' + arg.date.day + ' ' +
@@ -311,10 +311,12 @@
             listDayFormat: function (arg) {
                 return arg.date.day + ' ' + MONTHS[arg.date.month] + ' ' + arg.date.year;
             },
-            events: hasEquipment ? loadEvents : [],
+            events: loadEvents,
+            /* FullCalendar redraws its toolbar now and then; keep the picker in. */
+            datesSet: function () { placeEquipmentPicker(); },
             select: function (info) {
                 calendar.unselect();
-                if (!hasEquipment) {
+                if (cfg.equipmentId === null) {
                     notice('Please choose the equipment first, then pick a time.');
                     if (equipmentEl) { equipmentEl.focus(); }
                     return;
@@ -329,6 +331,53 @@
         });
 
         calendar.render();
+        placeEquipmentPicker();
+        wireEquipmentPicker();
+
+        /* The picker goes in the toolbar's middle, left of the dates. */
+        function placeEquipmentPicker() {
+            var chunk = el.querySelector('.fc-header-toolbar .fc-toolbar-chunk:nth-child(2)');
+            if (equipmentEl && chunk && equipmentEl.parentNode !== chunk) {
+                chunk.insertBefore(equipmentEl, chunk.firstChild);
+            }
+        }
+
+        /*
+         * Choosing equipment shows its bookings straight away, in the same
+         * view and on the same dates. The address follows, so a reload or a
+         * shared link opens the same piece.
+         */
+        function wireEquipmentPicker() {
+            if (!equipmentEl) {
+                return;
+            }
+
+            equipmentEl.addEventListener('change', function () {
+                var option = equipmentEl.options[equipmentEl.selectedIndex];
+                if (!option || !option.dataset.id) {
+                    return;
+                }
+
+                cfg.equipmentId = parseInt(option.dataset.id, 10);
+                dialogEquipmentEl.textContent = option.textContent.trim();
+
+                /* Nothing to go back to once a piece is chosen. */
+                var placeholder = equipmentEl.querySelector('option[value=""]');
+                if (placeholder) {
+                    placeholder.remove();
+                }
+
+                if (noticeEl) {
+                    noticeEl.hidden = true;
+                }
+
+                if (window.history && history.replaceState) {
+                    history.replaceState(null, '', '?equipment=' + encodeURIComponent(option.value));
+                }
+
+                calendar.refetchEvents();
+            });
+        }
 
         /* A short message above the calendar that clears itself. */
         function notice(text) {
@@ -344,6 +393,11 @@
         /* ------------------------------------------------------------ data */
 
         function loadEvents(info, success, failure) {
+            if (cfg.equipmentId === null) {
+                success([]);
+                return;
+            }
+
             var url = feedUrl + '?equipment=' + encodeURIComponent(cfg.equipmentId) +
                 '&from=' + encodeURIComponent(info.startStr) +
                 '&to=' + encodeURIComponent(info.endStr);
@@ -448,6 +502,8 @@
             start.readOnly(readOnly);
             end.readOnly(readOnly);
             purposeEl.readOnly = readOnly;
+            /* The rules are for booking; someone else's booking is only shown. */
+            rulesEl.hidden = readOnly;
             if (ownerNetidEl) { ownerNetidEl.disabled = readOnly; }
         }
 
@@ -840,8 +896,9 @@
 
     /*
      * A calendar heading: "14 - 20 Sep 2026", collapsing whatever the two ends
-     * have in common. FullCalendar hands the end as exclusive, so the last day
-     * shown is the one before it.
+     * have in common; a single day reads "14 Sep 2026". FullCalendar has
+     * already moved the exclusive end back by 1 ms, into the last day shown,
+     * so that day is the end's own date.
      */
     function rangeLabel(startParts, endParts) {
         if (!endParts) {
@@ -849,8 +906,8 @@
         }
 
         var start = startParts.marker;
-        /* The end is exclusive, and markers are UTC, so a day is always 24h. */
-        var last = new Date(endParts.marker.getTime() - 86400000);
+        /* Markers are UTC dates, whatever the display timezone. */
+        var last = endParts.marker;
 
         var startDay = start.getUTCDate();
         var lastDay = last.getUTCDate();

@@ -578,9 +578,14 @@ the `equipment` table, `bookings.equipment_id`).
 
 The administrator manages the bookable equipment at `/admin/equipment`. Each
 booking belongs to one piece of equipment, and the calendar shows one piece at
-a time: a dropdown under the "Equipment booking calendar" heading switches
-between them, and the date label above the calendar starts with the
-equipment's name. A visit to `/booking` starts with no equipment selected:
+a time. The heading "Equipment booking calendar" is followed directly by the
+calendar's toolbar: the arrows and Today on the left, Week/Day/List on the
+right, and in the middle a dropdown with the equipment, left of the dates
+shown ("5 - 9 Oct 2026" for a week, "5 Oct 2026" for a day). Choosing another
+piece shows its bookings at once, without reloading the page, in the same view
+and on the same dates, and puts `?equipment=<slug>` in the address. The legend
+sits centred under the calendar, and the booking rules are shown in the
+booking dialog, under Purpose. A visit to `/booking` starts with no equipment selected:
 the calendar stays empty and read-only until a piece is chosen, and trying to
 book before that asks the member to choose the equipment first. Nothing is
 remembered between visits, so nobody books the wrong equipment by accident.

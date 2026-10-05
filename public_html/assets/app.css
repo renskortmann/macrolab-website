@@ -292,12 +292,14 @@ dl.facts dd { margin: 0; }
 code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; }
 
 /* ------------------------------------------------------------ calendar --- */
-.legend { display: flex; gap: 1rem; list-style: none; margin: 0 0 0.75rem; padding: 0; font-size: 0.85rem; }
+/* Under the calendar, centred. */
+.legend { display: flex; justify-content: center; gap: 1rem; list-style: none; margin: 0.75rem 0 0; padding: 0; font-size: 0.85rem; }
 .swatch { display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 2px; vertical-align: middle; }
 .swatch.own { background: var(--own); }
 .swatch.other { background: var(--other); }
 
-.rules-summary { margin: 0.5rem 0 1rem; }
+/* In the booking dialog, under Purpose. */
+.rules-summary { margin: 0.6rem 0 0; }
 
 /* A date input beside the 24h time dropdown that goes with it. */
 .when { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
@@ -316,10 +318,6 @@ input[type="text"].date-text { width: 8.5rem; max-width: 8.5rem; }
 .when select { width: auto; }
 .when-echo { margin: 0.25rem 0 0; }
 
-.equipment-picker { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.75rem; }
-.equipment-picker label { margin: 0; }
-.equipment-picker select { width: auto; min-width: 12rem; }
-
 #calendar { margin-top: 0.5rem; }
 
 /* Own bookings carry the accent colour; everyone else's are neutral, so the
@@ -327,11 +325,16 @@ input[type="text"].date-text { width: 8.5rem; max-width: 8.5rem; }
 .fc-event.booking-own { background: var(--own); border-color: var(--own); color: #fff; }
 .fc-event.booking-other { background: var(--other); border-color: var(--other); color: #fff; }
 
-/* The label above the calendar - "LUNA OD6 28 Sep - 1 Oct 2026" - may be
-   long; let it take the room between the buttons and wrap onto more lines. */
+/* The toolbar's middle: the equipment picker, then the dates shown. It takes
+   the room between the buttons; on a narrow screen the picker wraps above
+   the dates. */
 .fc .fc-header-toolbar { flex-wrap: wrap; gap: 0.5rem; }
-.fc .fc-toolbar-chunk:nth-child(2) { flex: 1 1 12rem; min-width: 0; text-align: center; }
+.fc .fc-toolbar-chunk:nth-child(2) {
+    flex: 1 1 12rem; min-width: 0;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem 0.75rem;
+}
 .fc .fc-toolbar-title { white-space: normal; overflow-wrap: anywhere; line-height: 1.25; }
+#equipment { width: auto; max-width: 100%; min-width: 10rem; }
 
 dialog {
     border: 1px solid var(--line);

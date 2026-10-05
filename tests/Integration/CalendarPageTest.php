@@ -50,30 +50,61 @@ final class CalendarPageTest extends DatabaseTestCase
 
         // The booking dialog names the equipment and whom the booking is for.
         self::assertMatchesRegularExpression(
-            '#<dt>Equipment</dt>\s*<dd>' . preg_quote((string) $piece['name'], '#') . '</dd>#',
+            '#<dt>Equipment</dt>\s*<dd id="booking-dialog-equipment">' . preg_quote((string) $piece['name'], '#') . '</dd>#',
             $response->body
         );
         self::assertSame('kim', $this->config($response)['userLabel']);
     }
 
-    public function testOnlyTheDateLabelNamesTheEquipment(): void
+    public function testOnlyThePickerNamesTheEquipment(): void
     {
         $piece = Equipment::primary();
         $response = $this->show(['equipment' => $piece['slug']]);
 
         self::assertMatchesRegularExpression('#<section class="card">\s*<h1>Equipment booking calendar</h1>#', $response->body,
             'the heading does not turn into the equipment name');
-        self::assertStringContainsString('<title>Booking &middot; ', $response->body, 'nor does the browser tab');
-        self::assertSame($piece['name'], $this->config($response)['equipmentName'], 'and so does the date label');
+        self::assertStringContainsString('<title>Equipment booking &middot; ', $response->body, 'nor does the browser tab');
+        self::assertArrayNotHasKey('equipmentName', $this->config($response), 'nor does the date label');
+        self::assertMatchesRegularExpression(
+            '#<option value="' . preg_quote((string) $piece['slug'], '#') . '" data-id="' . $piece['id'] . '"\s+selected>#',
+            $response->body,
+            'the picker shows it, and carries its id so the browser can switch without a reload'
+        );
     }
 
-    public function testTheLegendSitsRightAboveTheCalendar(): void
+    public function testNothingButThePickerSitsBetweenTheHeadingAndTheCalendar(): void
+    {
+        $piece = Equipment::primary();
+        Equipment::update((int) $piece['id'], (string) $piece['name'], 'A description that is no longer shown');
+        $body = $this->show(['equipment' => $piece['slug']])->body;
+
+        self::assertMatchesRegularExpression(
+            '#<h1>Equipment booking calendar</h1>\s*<select id="equipment" aria-label="Equipment">.*?</select>\s*'
+            . '<p id="calendar-notice"[^>]*></p>\s*<div id="calendar"#s',
+            $body
+        );
+        self::assertStringNotContainsString('A description that is no longer shown', $body);
+        self::assertStringNotContainsString('>Show</button>', $body);
+    }
+
+    public function testTheLegendSitsRightUnderTheCalendar(): void
     {
         self::assertMatchesRegularExpression(
-            '#<p class="muted small rules-summary">.*</p>\s*<ul class="legend">.*</ul>\s*'
-            . '<p id="calendar-notice"[^>]*></p>\s*<div id="calendar"#s',
+            '#<div id="calendar"[^>]*></div>\s*<ul class="legend">#',
             $this->show(['equipment' => Equipment::primary()['slug']])->body
         );
+    }
+
+    public function testTheRulesAreInTheBookingDialogUnderPurpose(): void
+    {
+        $body = $this->show(['equipment' => Equipment::primary()['slug']])->body;
+
+        self::assertMatchesRegularExpression(
+            '#<dialog id="booking-dialog">.*<input id="booking-purpose"[^>]*>\s*'
+            . '<p class="muted small rules-summary" id="booking-rules">\s*Bookable #s',
+            $body
+        );
+        self::assertSame(1, substr_count($body, 'rules-summary'), 'and only there');
     }
 
     public function testTheOldMachineParameterNoLongerSelectsAnything(): void

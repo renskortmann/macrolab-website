@@ -27,7 +27,15 @@ built: routes, columns, setting and config are scaffolding, and
 without a shell on the server (see "Getting vendor/ onto the server").
 
 - Tests: `composer install && vendor/bin/phpunit` (integration suite is skipped
-  unless `MACROLAB_TEST_DB_NAME` is set, see `tests/test-config.php`).
+  unless `MACROLAB_TEST_DB_NAME` is set, see `tests/test-config.php`). Run it
+  with the database before calling a change done: view and controller tests
+  are integration tests, and a skipped run hid a broken assertion once
+  (2026-10-05). The dev machine has a scratch test database; its name and how
+  to run against it are in `CLAUDE.local.md`. Never point the tests at the
+  dev database: they drop and rebuild the schema.
+- Claude's WSL environment has no browser and no Node, so it cannot see the
+  UI or run `app.js`. Check JS syntax by parsing it (e.g. Python `esprima`
+  installed into the scratchpad) and leave the visual check to the user.
 - Local run: see README.md "Local development" (`php -S localhost:8000 -t public_html`).
 - `app/config.php` is gitignored and machine-specific. Never commit it or any
   generated key/token.
@@ -267,7 +275,18 @@ To do:
     CSV export keep ISO dates on purpose. Tested on the live site: booking
     dialog, calendar button, typed dates, time overview filter, time-entry
     edit.
-11. Next time: backups (ask ICT about server-level backups first; see item 3).
+11. **Not yet confirmed live** (as of 2026-10-05; no migration in either, so
+    Pull + Deploy suffices). Strike through once checked on the live site:
+    - "Equipment booking" wording (commit `2160091`, pushed): the screens
+      never say "booking" alone for the system, since it could mean
+      registering time; a single reservation inside the equipment booking
+      pages is still "a booking". Hub tiles side by side with icons.
+    - Calendar layout: the equipment dropdown in the calendar toolbar, left
+      of the dates, switching without reload and keeping the dates shown; the
+      rules in the booking dialog; the legend under the calendar; the date
+      label fixed (it showed "5 - 8 Oct" for a Mon-Fri week and "5 - 4 Oct"
+      for a day). Not yet committed on 2026-10-05.
+12. Next time: backups (ask ICT about server-level backups first; see item 3).
    Until then, export the database from phpMyAdmin before each release that
    brings a migration.
 
