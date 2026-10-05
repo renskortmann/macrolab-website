@@ -164,7 +164,7 @@ prefix. Name, user (it contains a hyphen; quote it in config.php) and password
 are in the user's password manager. The database is empty until `/install`
 runs.
 
-## Deployment status (as of 2026-10-04)
+## Deployment status (as of 2026-10-05)
 
 **Live.** `macrolab.citg.tudelft.nl` is a CNAME to the shared hosting server
 (ICT created it; the zone is not managed in Plesk). A Let's Encrypt certificate
@@ -275,17 +275,17 @@ To do:
     CSV export keep ISO dates on purpose. Tested on the live site: booking
     dialog, calendar button, typed dates, time overview filter, time-entry
     edit.
-11. **Not yet confirmed live** (as of 2026-10-05; no migration in either, so
-    Pull + Deploy suffices). Strike through once checked on the live site:
-    - "Equipment booking" wording (commit `2160091`, pushed): the screens
-      never say "booking" alone for the system, since it could mean
-      registering time; a single reservation inside the equipment booking
-      pages is still "a booking". Hub tiles side by side with icons.
-    - Calendar layout: the equipment dropdown in the calendar toolbar, left
-      of the dates, switching without reload and keeping the dates shown; the
-      rules in the booking dialog; the legend under the calendar; the date
-      label fixed (it showed "5 - 8 Oct" for a Mon-Fri week and "5 - 4 Oct"
-      for a day). Not yet committed on 2026-10-05.
+11. ~~"Equipment booking" wording and calendar layout~~ - live 2026-10-05
+    (commits `2160091` and `e29d1ef`, Pull + Deploy only, no migration),
+    checked on the live site by the user:
+    - The screens never say "booking" alone for the system, since it could
+      mean registering time; a single reservation inside the equipment
+      booking pages is still "a booking". Hub tiles side by side with icons.
+    - Calendar: the equipment dropdown sits in the calendar toolbar, left of
+      the dates, and switches without a reload, keeping the dates shown; the
+      rules are in the booking dialog; the legend is under the calendar; the
+      date label is fixed (it showed "5 - 8 Oct" for a Mon-Fri week and
+      "5 - 4 Oct" for a day).
 12. Next time: backups (ask ICT about server-level backups first; see item 3).
    Until then, export the database from phpMyAdmin before each release that
    brings a migration.
